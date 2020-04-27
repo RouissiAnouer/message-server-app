@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import * as Stomp from 'stompjs';
+import * as SockJS from 'sockjs-client';
 
 @Component({
   selector: 'app-tab2',
@@ -22,8 +23,8 @@ export class Tab2Page implements OnInit {
 
   public connect(owner: string) {
     //connect to stomp where stomp endpoint is exposed
-    //let ws = new SockJS(http://localhost:8080/greeting);
-    let socket = new WebSocket("ws://localhost:8088/greeting");
+    let socket = new SockJS("http://192.168.1.96:8088/greeting");
+    // let socket = new WebSocket("ws://192.168.1.116:8088/greeting");
     this.ws = Stomp.over(socket);
     let that = this;
     let sessionId = "";
