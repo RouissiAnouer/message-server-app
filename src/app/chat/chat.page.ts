@@ -1,17 +1,42 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import * as Stomp from 'stompjs';
 import * as SockJS from 'sockjs-client';
+import { User } from '../model/User';
+import { LoginService } from '../services/login.service';
+import { HttpEventType, HttpResponse, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.page.html',
   styleUrls: ['./chat.page.scss'],
 })
-export class ChatPage implements OnInit {
-  public from: string = "1"; 
-  public receiver: string = "2"; 
+export class ChatPage implements AfterViewInit {
+  public user: User;
+  public from: string; 
+  public receiver: string; 
   public text: string;
-  constructor() { }
+  constructor(private loginService:LoginService, private route: Router) {
+    this.user = JSON.parse(localStorage.getItem('user'));
+   }
+
+   public ngAfterViewInit(): void {
+    this.loginService.getUserInfo(this.user).subscribe(res => {
+      if (res.type == HttpEventType.Sent) {
+        console.log('loading...');
+      } else if (res instanceof HttpResponse) {
+        let body: any = res.body;
+        this.from = body.id;
+        console.log(this.from);
+        this.receiver = '2';
+        this.connect(this.from);
+      }
+    },
+    err => {
+      // this.disconnect(this.from);
+      this.route.navigate(['']);
+    })
+   }
 
   greetings: string[] = [];
   showConversation: boolean = false;
@@ -19,12 +44,17 @@ export class ChatPage implements OnInit {
   disabled: boolean;
 
   public connect(owner: string) {
+    let header = new HttpHeaders({
+      "content-type": "application/json",
+      "Authorization": this.user.tokenType + ' ' + this.user.token
+    });
     //connect to stomp where stomp endpoint is exposed
-    let socket = new SockJS("http://localhost:8088/greeting");
-    // let socket = new WebSocket("ws://192.168.1.116:8088/greeting");
+    let socket = new SockJS("http://localhost:8088/greeting", null, {headers: {"Authorization": this.user.tokenType + ' ' + this.user.token}});
+    // let socket = new WebSocket("ws://localhost:8088/greeting");
     this.ws = Stomp.over(socket);
     let that = this;
     let sessionId = "";
+
 
     this.ws.connect({}, function (frame) {
 
@@ -60,13 +90,8 @@ export class ChatPage implements OnInit {
     this.greetings = [];
   }
 
-
-  public ngOnInit(): void {
-   this.connect(this.from);
-  }
-
   public disconnect(from: string) {
-    this.disconnect(from);
+    this.ws.disconnect();
   }
 
 }

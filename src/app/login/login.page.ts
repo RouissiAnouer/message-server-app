@@ -25,8 +25,9 @@ export class LoginPage implements OnInit {
     this.loginService.login(this.username, this.password).subscribe((data: any) => {
       if (data instanceof HttpResponse) {
         this.user = data.body;
+        localStorage.setItem('user', JSON.stringify(data.body));
         console.log("finish loading");
-        this.routes.navigate(['chat', this.user]);
+        this.routes.navigate(['chat']);
       } else if (data.type == HttpEventType.Sent) {
         console.log("loading...");
       }
