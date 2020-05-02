@@ -1,18 +1,17 @@
-import { Injectable } from "@angular/core";
+import { Component, OnInit } from '@angular/core';
 import * as Stomp from 'stompjs';
 import * as SockJS from 'sockjs-client';
 
-export interface Message {
-  author: string;
-  message: string;
-}
-
-@Injectable()
-export class ChatService {
-
-  constructor() {
-
-  }
+@Component({
+  selector: 'app-chat',
+  templateUrl: './chat.page.html',
+  styleUrls: ['./chat.page.scss'],
+})
+export class ChatPage implements OnInit {
+  public from: string = "1"; 
+  public receiver: string = "2"; 
+  public text: string;
+  constructor() { }
 
   greetings: string[] = [];
   showConversation: boolean = false;
@@ -21,8 +20,8 @@ export class ChatService {
 
   public connect(owner: string) {
     //connect to stomp where stomp endpoint is exposed
-    //let ws = new SockJS(http://localhost:8080/greeting);
-    let socket = new WebSocket("ws://localhost:8088/greeting");
+    let socket = new SockJS("http://localhost:8088/greeting");
+    // let socket = new WebSocket("ws://192.168.1.116:8088/greeting");
     this.ws = Stomp.over(socket);
     let that = this;
     let sessionId = "";
@@ -33,8 +32,8 @@ export class ChatService {
         alert("Error " + message.body);
       });
       that.ws.subscribe("/topic/reply."+owner, function (message) {
-        console.log(message)
-        that.showGreeting(message.body);
+        console.log(JSON.parse(message.body))
+        that.showGreeting(JSON.parse(message.body));
       });
       that.disabled = true;
     }, function (error) {
@@ -42,20 +41,12 @@ export class ChatService {
     });
   }
 
-  public disconnect(owner: string) {
-    if (this.ws != null) {
-      this.ws.ws.close();
-    }
-    this.setConnected(false);
-    console.log("Disconnected");
-  }
-
-  sendMsg(receiver: string, message: string, from) {
+  sendMessage(receiver: string, message: string, from) {
     let data = JSON.stringify({
-      'from': from,
-      'text': message
+      from: this.from,
+      text: this.text
     })
-    this.ws.send("/app/message/"+receiver, {}, data);
+    this.ws.send("/app/message/"+this.receiver, {}, data);
   }
 
   showGreeting(message) {
@@ -68,4 +59,14 @@ export class ChatService {
     this.showConversation = connected;
     this.greetings = [];
   }
+
+
+  public ngOnInit(): void {
+   this.connect(this.from);
+  }
+
+  public disconnect(from: string) {
+    this.disconnect(from);
+  }
+
 }
