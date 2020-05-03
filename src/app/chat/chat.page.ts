@@ -1,10 +1,11 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
-import * as Stomp from 'stompjs';
-import * as SockJS from 'sockjs-client';
-import { User } from '../model/User';
-import { LoginService } from '../services/login.service';
-import { HttpEventType, HttpResponse, HttpHeaders } from '@angular/common/http';
+import { User, UserInfo } from '../model/User';
+import { HttpEventType, HttpResponse, HttpHeaders, HttpEvent } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { ChatService } from '../services/chat.service';
+import { ModalController } from '@ionic/angular';
+import { ModalChat } from './modal-popup/chat-modal';
+import { LoginService } from '../services/login.service';
 
 @Component({
   selector: 'app-chat',
@@ -12,86 +13,62 @@ import { Router } from '@angular/router';
   styleUrls: ['./chat.page.scss'],
 })
 export class ChatPage implements AfterViewInit {
+  public usersInfo: Array<UserInfo>;
+  public receiver: string;
   public user: User;
-  public from: string; 
-  public receiver: string; 
-  public text: string;
-  constructor(private loginService:LoginService, private route: Router) {
-    this.user = JSON.parse(localStorage.getItem('user'));
-   }
+  constructor(
+    private chatService: ChatService,
+    public modalController: ModalController,
+    public loginService: LoginService) {
+      this.user = JSON.parse(localStorage.getItem('user'));
+  }
 
-   public ngAfterViewInit(): void {
-    this.loginService.getUserInfo(this.user).subscribe(res => {
+  public ngAfterViewInit(): void {
+    this.chatService.getAllUser(this.user.userName).subscribe((res: HttpEvent<any>) => {
       if (res.type == HttpEventType.Sent) {
         console.log('loading...');
-      } else if (res instanceof HttpResponse) {
-        let body: any = res.body;
-        this.from = body.id;
-        console.log(this.from);
-        this.receiver = '2';
-        this.connect(this.from);
+      } else if (res.type == HttpEventType.Response) {
+        console.log('finish Loading');
+        this.usersInfo = res.body;
+        this.usersInfo.forEach((user: UserInfo) => {
+          user.image = "assets/icon/img_avatar2.png"
+          let array = user.sent.sort((a, b) => b.id - a.id);
+          user.sent = [];
+          array.forEach(item => {
+            user.sent.push(item);
+        })
+        });
+      }
+    },
+      err => {
+        console.log(err);
+      });
+  }
+
+  public openChat(user: User) {
+
+    this.loginService.getUserInfo(user).subscribe(res => {
+      if (res.type == HttpEventType.Sent) {
+        console.log('loading...');
+      } else if (res.type == HttpEventType.Response) {
+        this.presentModal(user.id, res.body);
       }
     },
     err => {
-      // this.disconnect(this.from);
-      this.route.navigate(['']);
-    })
-   }
-
-  greetings: string[] = [];
-  showConversation: boolean = false;
-  ws: any;
-  disabled: boolean;
-
-  public connect(owner: string) {
-    let header = new HttpHeaders({
-      "content-type": "application/json",
-      "Authorization": this.user.tokenType + ' ' + this.user.token
+      console.log(err);
     });
-    //connect to stomp where stomp endpoint is exposed
-    let socket = new SockJS("http://localhost:8088/greeting", null, {headers: {"Authorization": this.user.tokenType + ' ' + this.user.token}});
-    // let socket = new WebSocket("ws://localhost:8088/greeting");
-    this.ws = Stomp.over(socket);
-    let that = this;
-    let sessionId = "";
+    
+  }
 
-
-    this.ws.connect({}, function (frame) {
-
-      that.ws.subscribe("/errors", function (message) {
-        alert("Error " + message.body);
-      });
-      that.ws.subscribe("/topic/reply."+owner, function (message) {
-        console.log(JSON.parse(message.body))
-        that.showGreeting(JSON.parse(message.body));
-      });
-      that.disabled = true;
-    }, function (error) {
-      alert("STOMP error " + error);
+  async presentModal(user: number, userInfoToChat: any) {
+    const modal = await this.modalController.create({
+      component: ModalChat,
+      componentProps: {
+        'receiver': user,
+        'chat': userInfoToChat
+      }
     });
-  }
-
-  sendMessage(receiver: string, message: string, from) {
-    let data = JSON.stringify({
-      from: this.from,
-      text: this.text
-    })
-    this.ws.send("/app/message/"+this.receiver, {}, data);
-  }
-
-  showGreeting(message) {
-    this.showConversation = true;
-    this.greetings.push(message)
-  }
-
-  setConnected(connected) {
-    this.disabled = connected;
-    this.showConversation = connected;
-    this.greetings = [];
-  }
-
-  public disconnect(from: string) {
-    this.ws.disconnect();
+    return await modal.present();
   }
 
 }

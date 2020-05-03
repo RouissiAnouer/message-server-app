@@ -5,6 +5,7 @@ import { HttpInterceptor, HttpRequest, HttpHandler, HttpUserEvent, HttpErrorResp
 import { Observable } from 'rxjs';
 
 const TOKEN_HEADER_KEY = 'Authorization';
+const BASE_URL = 'http://localhost:8088/';
 
 @Injectable()
 export class Interceptor implements HttpInterceptor {
@@ -16,8 +17,10 @@ export class Interceptor implements HttpInterceptor {
     intercept(req: HttpRequest<any>, next: HttpHandler):
         Observable<HttpEvent<any>> {
         let authReq = req;
-        if (this.token != null) {
+        if (this.token != null && req.url != BASE_URL + 'auth/login') {
             authReq = req.clone({ headers: req.headers.set(TOKEN_HEADER_KEY, 'Bearer ' + this.token) });
+        } else {
+            authReq = req.clone({ headers: req.headers.set('Content-Type','application/json') });
         }
         return next.handle(authReq).do(
             (err: any) => {
@@ -30,5 +33,4 @@ export class Interceptor implements HttpInterceptor {
             }
         );
     }
-
 }

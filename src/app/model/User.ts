@@ -5,4 +5,22 @@ export interface User {
     familyName: string;
     userName: string;
     tokenType: string;
+    id: number;
+    userAvatar: string;
+}
+export interface UserInfo extends Document {
+    givenName: string;
+    familyName: string;
+    userName: string;
+    id: number;
+    sent: Array<Chats>;
+    received: Array<Chats>;
+    image: string;
+}
+export interface Chats {
+    id: number;
+    idReceiver: number;
+    idSender: number;
+    message: string;
+    timestamp: string;
 }
