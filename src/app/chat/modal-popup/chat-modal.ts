@@ -1,3 +1,4 @@
+import { Storage } from '@ionic/storage';
 import { Component, Input, OnInit, ViewChild, AfterViewInit, ViewChildren, AfterViewChecked } from '@angular/core';
 import { User, Chats, UserInfo } from 'src/app/model/User';
 import { HttpHeaders } from '@angular/common/http';
@@ -5,6 +6,8 @@ import * as Stomp from 'stompjs';
 import * as SockJS from 'sockjs-client';
 import { ModalController, NavParams, IonContent } from '@ionic/angular';
 import { DatePipe } from '@angular/common';
+import { environment } from './../../../environments/environment';
+
 export interface ChatsList {
     userId: string;
     userAvatar: string;
@@ -18,9 +21,9 @@ export interface ChatsList {
     templateUrl: './chat.modal.html',
     styleUrls: ['./chat.modal.scss'],
 })
-export class ModalChat implements OnInit, AfterViewChecked {
+export class ModalChat implements AfterViewChecked {
 
-    @ViewChild('IonContent', {static: false}) content: IonContent;
+    @ViewChild('IonContent', { static: false }) content: IonContent;
 
     @Input() receiver: number;
     @Input() userInput: string;
@@ -35,9 +38,13 @@ export class ModalChat implements OnInit, AfterViewChecked {
     public disabled: boolean;
     public count: number;
 
-    constructor(private modalCtrl: ModalController, private params: NavParams, private datePipe: DatePipe) {
-        this.user = JSON.parse(localStorage.getItem('user'));
-        this.user.userAvatar = "assets/icon/img_avatar2.png";
+    constructor(private modalCtrl: ModalController, private params: NavParams, private datePipe: DatePipe, private storage: Storage) {
+        // this.user = JSON.parse(localStorage.getItem('user'));
+        this.storage.get('user').then(val => {
+            this.user = JSON.parse(val);
+            this.user.userAvatar = "assets/icon/img_avatar2.png";
+            this.getPage();
+        });
         this.chats = this.params.get('chat');
         this.count = 60;
     }
@@ -45,7 +52,7 @@ export class ModalChat implements OnInit, AfterViewChecked {
         this.content.scrollToBottom(500);
     }
 
-    ngOnInit(): void {
+    getPage(): void {
         console.log(this.chats);
         this.chats.received.forEach(msg => {
             let obj: ChatsList = {
@@ -86,7 +93,7 @@ export class ModalChat implements OnInit, AfterViewChecked {
 
     public connect(owner: number) {
         //connect to stomp where stomp endpoint is exposed
-        let socket = new SockJS("http://localhost:8088/greeting");
+        let socket = new SockJS(environment.baseUrl + "/greeting");
         // let socket = new WebSocket("ws://localhost:8088/greeting");
         this.ws = Stomp.over(socket);
         let that = this;
@@ -137,7 +144,7 @@ export class ModalChat implements OnInit, AfterViewChecked {
         this.showConversation = true;
         let now = new Date();
         let obj: ChatsList = {
-            message: message,
+            message: message.text,
             time: this.datePipe.transform(now, "HH:mm:ss"),
             userAvatar: this.user.userAvatar,
             userId: 'User',

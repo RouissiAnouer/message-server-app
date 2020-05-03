@@ -3,6 +3,9 @@ import { Router } from '@angular/router';
 import 'rxjs/add/operator/do';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpUserEvent, HttpErrorResponse, HttpEvent } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Storage } from '@ionic/storage';
+import { User } from '../model/User';
+
 
 const TOKEN_HEADER_KEY = 'Authorization';
 const BASE_URL = 'http://localhost:8088/';
@@ -10,8 +13,13 @@ const BASE_URL = 'http://localhost:8088/';
 @Injectable()
 export class Interceptor implements HttpInterceptor {
     public token: string;
-    constructor(private router: Router) {
-        this.token = JSON.parse(localStorage.getItem('user')).token;
+    constructor(private router: Router, private storage: Storage) {
+        // this.token = JSON.parse(localStorage.getItem('user')).token;
+        this.storage.get('user').then(val => {
+            if (val != null) {
+                this.token = JSON.parse(val).token;
+            }
+        });
     }
 
     intercept(req: HttpRequest<any>, next: HttpHandler):

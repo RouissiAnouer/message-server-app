@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpEvent, HttpRequest, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { User } from '../model/User';
-import { RequestOptions } from '@angular/http';
+import { environment } from './../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -16,12 +16,12 @@ export class LoginService {
       username: username,
       password: password
     });
-    const request = new HttpRequest('POST', 'http://localhost:8088/auth/login', data, {});
+    const request = new HttpRequest('POST', environment.baseUrl+'/auth/login', data, {});
     return this.http.request(request);
   }
   getUserInfo(user: User): Observable<HttpEvent<{}>> {
     let params = new HttpParams().set('email', user.userName);
-    const request = new HttpRequest('GET', 'http://localhost:8088/user/userinfo', {
+    const request = new HttpRequest('GET', environment.baseUrl+'/user/userinfo', {
       params: params
     });
     return this.http.request(request);

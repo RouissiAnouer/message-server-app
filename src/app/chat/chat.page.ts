@@ -1,3 +1,4 @@
+import { Storage } from '@ionic/storage';
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { User, UserInfo } from '../model/User';
 import { HttpEventType, HttpResponse, HttpHeaders, HttpEvent } from '@angular/common/http';
@@ -12,18 +13,22 @@ import { LoginService } from '../services/login.service';
   templateUrl: './chat.page.html',
   styleUrls: ['./chat.page.scss'],
 })
-export class ChatPage implements AfterViewInit {
+export class ChatPage {
   public usersInfo: Array<UserInfo>;
   public receiver: string;
   public user: User;
   constructor(
     private chatService: ChatService,
     public modalController: ModalController,
-    public loginService: LoginService) {
-      this.user = JSON.parse(localStorage.getItem('user'));
+    public loginService: LoginService, private storage: Storage) {
+      storage.get('user').then((val) => {
+        this.user = JSON.parse(val);
+        this.getAllUser();
+      })
+      // this.user = JSON.parse(localStorage.getItem('user'));
   }
 
-  public ngAfterViewInit(): void {
+  public getAllUser(): void {
     this.chatService.getAllUser(this.user.userName).subscribe((res: HttpEvent<any>) => {
       if (res.type == HttpEventType.Sent) {
         console.log('loading...');
