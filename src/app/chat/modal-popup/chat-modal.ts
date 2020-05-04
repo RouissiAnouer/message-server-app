@@ -41,7 +41,7 @@ export class ModalChat implements AfterViewChecked {
     public header: HttpHeaders;
 
     constructor(private modalCtrl: ModalController, private params: NavParams, private datePipe: DatePipe, private storage: Storage
-        ,private authService: AuthenticationService) {
+        , private authService: AuthenticationService) {
         // this.user = JSON.parse(localStorage.getItem('user'));
         this.storage.get('user').then(val => {
             this.user = JSON.parse(val);
@@ -53,7 +53,7 @@ export class ModalChat implements AfterViewChecked {
             'Content-Type': 'application/json'
         });
         this.chats = this.params.get('chat');
-        this.count = 60;
+        
     }
     ngAfterViewChecked(): void {
         this.content.scrollToBottom(500);
@@ -87,12 +87,11 @@ export class ModalChat implements AfterViewChecked {
             })
         });
         console.log(this.msgList);
+        this.count = this.msgList[this.msgList.length-1].id;
         this.connect(this.user.id);
     }
 
     dismiss() {
-        // using the injected ModalController this page
-        // can "dismiss" itself and optionally pass back data
         this.modalCtrl.dismiss({
             'dismissed': true
         });
@@ -108,7 +107,7 @@ export class ModalChat implements AfterViewChecked {
         // let socket = new WebSocket("ws://localhost:8088/greeting");
         this.ws = Stomp.over(socket);
         let that = this;
-        
+
         this.ws.connect({}, function (frame) {
 
             that.ws.subscribe("/errors", function (message) {
@@ -149,24 +148,25 @@ export class ModalChat implements AfterViewChecked {
         this.userInput = '';
         setTimeout(() => {
             this.content.scrollToBottom(8);
-        }, 10);
+        }, 600);
     }
 
     showGreeting(message) {
-        this.showConversation = true;
-        let now = new Date();
-        let obj: ChatsList = {
-            message: message.text,
-            time: this.datePipe.transform(now, "HH:mm:ss"),
-            userAvatar: this.user.userAvatar,
-            userId: 'User',
-            id: this.count++
-        };
-        this.msgList.push(obj);
-        this.greetings.push(message)
-        setTimeout(() => {
-            this.content.scrollToBottom(8);
-        }, 10);
+        this.count++
+        if (message.from === this.receiver.toString()) {
+            let obj: ChatsList = {
+                message: message.text,
+                time: message.time,
+                userAvatar: this.user.userAvatar,
+                userId: 'User',
+                id: message.id
+            };
+            this.msgList.push(obj);
+            this.greetings.push(message)
+            setTimeout(() => {
+                this.content.scrollToBottom(8);
+            }, 600);
+        }
     }
 
     setConnected(connected) {
