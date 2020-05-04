@@ -4,6 +4,7 @@ import { HttpResponse, HttpEventType } from '@angular/common/http';
 import { User } from '../model/User';
 import { Router } from '@angular/router';
 import { Storage } from '@ionic/storage';
+import { AuthenticationService } from '../services/authentication-service';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,7 @@ export class LoginPage implements OnInit {
 
   public user: User;
 
-  constructor(private loginService: LoginService, private routes: Router, private storage: Storage) { }
+  constructor(private loginService: LoginService, private routes: Router, private storage: Storage, private authService: AuthenticationService) { }
 
   ngOnInit() {
   }
@@ -27,6 +28,8 @@ export class LoginPage implements OnInit {
       if (data instanceof HttpResponse) {
         this.user = data.body;
         this.storage.set('user', JSON.stringify(data.body));
+        this.authService.setUser(this.user);
+        this.authService.setAuthenticated(true);
         console.log("finish loading");
         this.storage.get('user').then(val => {
           console.log(val);

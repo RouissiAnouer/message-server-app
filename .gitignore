@@ -31,4 +31,4 @@ npm-debug.log*
 /www
 /resources
 /e2e
-package-lock.json
+#package-lock.json

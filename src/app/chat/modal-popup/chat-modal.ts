@@ -7,6 +7,7 @@ import * as SockJS from 'sockjs-client';
 import { ModalController, NavParams, IonContent } from '@ionic/angular';
 import { DatePipe } from '@angular/common';
 import { environment } from './../../../environments/environment';
+import { AuthenticationService } from 'src/app/services/authentication-service';
 
 export interface ChatsList {
     userId: string;
@@ -37,13 +38,19 @@ export class ModalChat implements AfterViewChecked {
     public ws: any;
     public disabled: boolean;
     public count: number;
+    public header: HttpHeaders;
 
-    constructor(private modalCtrl: ModalController, private params: NavParams, private datePipe: DatePipe, private storage: Storage) {
+    constructor(private modalCtrl: ModalController, private params: NavParams, private datePipe: DatePipe, private storage: Storage
+        ,private authService: AuthenticationService) {
         // this.user = JSON.parse(localStorage.getItem('user'));
         this.storage.get('user').then(val => {
             this.user = JSON.parse(val);
             this.user.userAvatar = "assets/icon/img_avatar2.png";
             this.getPage();
+        });
+        this.header = new HttpHeaders({
+            'Authorization': 'Bearer ' + this.authService.getUser().token,
+            'Content-Type': 'application/json'
         });
         this.chats = this.params.get('chat');
         this.count = 60;
@@ -92,12 +99,16 @@ export class ModalChat implements AfterViewChecked {
     }
 
     public connect(owner: number) {
+        let header = this.header;
+        // let header: Headers = new Headers({
+        //     'Authorization': this.user.tokenType+' '+ this.user.token
+        // })
         //connect to stomp where stomp endpoint is exposed
         let socket = new SockJS(environment.baseUrl + "/greeting");
         // let socket = new WebSocket("ws://localhost:8088/greeting");
         this.ws = Stomp.over(socket);
         let that = this;
-
+        
         this.ws.connect({}, function (frame) {
 
             that.ws.subscribe("/errors", function (message) {
@@ -114,6 +125,7 @@ export class ModalChat implements AfterViewChecked {
     }
 
     sendMessage() {
+        let header = this.header;
         let now = new Date();
         let data = JSON.stringify({
             from: this.user.id,
