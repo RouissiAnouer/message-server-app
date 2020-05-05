@@ -1,36 +1,28 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>login</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Log In</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
 
-  <div id="id01" class="modal">
-  
-    <div class="modal-content animate">
-      <div class="imgcontainer">
-        <img src="assets/icon/img_avatar2.png" alt="Avatar" class="avatar">
-      </div>
-  
-      <div class="container">
-        <label for="uname"><b>Username</b></label>
-        <input type="text" placeholder="Enter Username" [(ngModel)]="username" required>
-  
-        <label for="psw"><b>Password</b></label>
-        <input type="password" placeholder="Enter Password" [(ngModel)]="password" required>
-          
-        <button type="submit" (click)="login()">Login</button>
-        <label>
-          <input type="checkbox" checked="checked" name="remember"> Remember me
-        </label>
-      </div>
-  
-      <div class="container" style="background-color:#f1f1f1">
-        <button type="button">Cancel</button>
-        <span class="psw">Forgot <a href="#">password?</a></span>
-      </div>
-    </div>
-  </div>
+      <ion-item lines="full">
+        <ion-label class="label-custom" position="floating">Email</ion-label>
+        <ion-input class="input-custom" type="text" [(ngModel)]="username" required></ion-input>
+      </ion-item>
 
+      <ion-item lines="full">
+        <ion-label class="label-custom" position="floating">Password</ion-label>
+        <ion-input class="input-custom" type="password" [(ngModel)]="password" required></ion-input>
+      </ion-item>
+
+  <ion-row>
+    <ion-col>
+      <ion-button type="submit" color="danger" expand="block" (click)="login()">Sign In</ion-button>
+      <a [routerLink]="['/forgot-password']" class="small-text">Forgot Password?</a>
+    </ion-col>
+  </ion-row>
 </ion-content>

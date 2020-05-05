@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { ModalChat } from './chat-modal';
+import { ChatSocketService } from 'src/app/services/chat-socket-service.service';
 
 @NgModule({
     declarations: [ModalChat],
@@ -10,6 +11,6 @@ import { ModalChat } from './chat-modal';
         FormsModule,
         IonicModule ],
     exports: [],
-    providers: [DatePipe],
+    providers: [DatePipe, ChatSocketService],
 })
 export class ChatPopupModule {}

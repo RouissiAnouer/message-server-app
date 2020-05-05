@@ -8,6 +8,9 @@ import { ModalController, NavParams, IonContent } from '@ionic/angular';
 import { DatePipe } from '@angular/common';
 import { environment } from './../../../environments/environment';
 import { AuthenticationService } from 'src/app/services/authentication-service';
+import { ChatSocketService } from 'src/app/services/chat-socket-service.service';
+import { Message } from 'src/app/model/message';
+import { StompHeaders } from '@stomp/stompjs';
 
 export interface ChatsList {
     userId: string;
@@ -30,7 +33,6 @@ export class ModalChat implements AfterViewChecked {
     @Input() userInput: string;
     public user: User;
     public chats: UserInfo;
-    public received: Array<Chats>;
     public avatar: string;
     public msgList: Array<ChatsList> = new Array<ChatsList>();
     public greetings: string[] = [];
@@ -38,45 +40,46 @@ export class ModalChat implements AfterViewChecked {
     public ws: any;
     public disabled: boolean;
     public count: number;
-    public header: HttpHeaders;
+    public sent: Array<Chats>;
+    public received: Array<Chats>;
 
-    constructor(private modalCtrl: ModalController, private params: NavParams, private datePipe: DatePipe, private storage: Storage
-        , private authService: AuthenticationService) {
-        // this.user = JSON.parse(localStorage.getItem('user'));
+    constructor(private modalCtrl: ModalController, 
+        private params: NavParams, 
+        private datePipe: DatePipe, 
+        private storage: Storage,
+        private authService: AuthenticationService,
+        private socketService: ChatSocketService) {
         this.storage.get('user').then(val => {
             this.user = JSON.parse(val);
             this.user.userAvatar = "assets/icon/img_avatar2.png";
             this.getPage();
         });
-        this.header = new HttpHeaders({
-            'Authorization': 'Bearer ' + this.authService.getUser().token,
-            'Content-Type': 'application/json'
-        });
-        this.chats = this.params.get('chat');
-        
+        this.sent = this.params.get('sent');
+        this.received = this.params.get('received');
+        console.log('SENT : ', this.sent);
+        console.log('RECEIVED : ', this.received);
     }
     ngAfterViewChecked(): void {
         this.content.scrollToBottom(500);
     }
 
     getPage(): void {
-        console.log(this.chats);
-        this.chats.received.forEach(msg => {
-            let obj: ChatsList = {
-                message: msg.message,
-                time: msg.timestamp,
-                userAvatar: "assets/icon/img_avatar2.png",
-                userId: 'toUser',
-                id: msg.id
-            };
-            this.msgList.push(obj);
-        });
-        this.chats.sent.forEach(msg => {
+        this.received.forEach(msg => {
             let obj: ChatsList = {
                 message: msg.message,
                 time: msg.timestamp,
                 userAvatar: "assets/icon/img_avatar2.png",
                 userId: 'User',
+                id: msg.id
+            };
+            this.msgList.push(obj);
+        });
+        this.sent.forEach(msg => {
+            let obj: ChatsList = {
+                message: msg.message,
+                time: msg.timestamp,
+                userAvatar: "assets/icon/img_avatar2.png",
+                userId: 'toUser',
                 id: msg.id
             };
             this.msgList.push(obj);
@@ -86,55 +89,60 @@ export class ModalChat implements AfterViewChecked {
                 this.msgList.push(item);
             })
         });
-        console.log(this.msgList);
-        this.count = this.msgList[this.msgList.length-1].id;
-        this.connect(this.user.id);
+        this.count = this.msgList[this.msgList.length - 1].id;
+        this.connectSocket(this.user.id);
     }
 
     dismiss() {
+        // this.socketService.disconnect();
         this.modalCtrl.dismiss({
             'dismissed': true
         });
     }
 
-    public connect(owner: number) {
-        let header = this.header;
-        // let header: Headers = new Headers({
-        //     'Authorization': this.user.tokenType+' '+ this.user.token
-        // })
-        //connect to stomp where stomp endpoint is exposed
-        let socket = new SockJS(environment.baseUrl + "/greeting");
-        // let socket = new WebSocket("ws://localhost:8088/greeting");
-        this.ws = Stomp.over(socket);
-        let that = this;
+    showGreeting(message) {
+        if (message.from === this.receiver.toString()) {
+            let obj: ChatsList = {
+                message: message.text,
+                time: message.time,
+                userAvatar: this.user.userAvatar,
+                userId: 'User',
+                id: message.id
+            };
+            this.count = message.id;
+            this.msgList.push(obj);
+            this.greetings.push(message)
+            setTimeout(() => {
+                this.content.scrollToBottom(500);
+            }, 10);
+        }
+    }
 
-        this.ws.connect({}, function (frame) {
+    sendMessageTo() {
+        let headers: StompHeaders = {
+            'Authorization': this.user.tokenType + ' ' + this.user.token,
+            'Content-Type': 'application/json'
+        }
+        let now = this.datePipe.transform(new Date(), 'MMM d, y, h:mm:ss a');
+        let data: Message = {
+            from: this.user.id.toString(),
+            text: this.userInput,
+            time: now
+        };
+        this.socketService.send('/send/message/' + this.receiver, data, headers);
+        this.orderSentMessage(now);
+    }
 
-            that.ws.subscribe("/errors", function (message) {
-                alert("Error " + message.body);
-            });
-            that.ws.subscribe("/topic/reply." + owner, function (message) {
-                console.log(JSON.parse(message.body))
-                that.showGreeting(JSON.parse(message.body));
-            });
-            that.disabled = true;
-        }, function (error) {
-            // alert("STOMP error " + error);
+    connectSocket(owner: number): void {
+        this.socketService.onMessage('/topic/reply.'+owner).subscribe(message => {
+            this.showGreeting(message);
         });
     }
 
-    sendMessage() {
-        let header = this.header;
-        let now = new Date();
-        let data = JSON.stringify({
-            from: this.user.id,
-            text: this.userInput,
-            time: this.datePipe.transform(now, "HH:mm:ss")
-        })
-        this.ws.send("/app/message/" + this.receiver, {}, data);
+    orderSentMessage(now: string): void {
         let obj: ChatsList = {
             message: this.userInput,
-            time: this.datePipe.transform(now, "HH:mm:ss"),
+            time: now,
             userAvatar: this.user.userAvatar,
             userId: 'toUser',
             id: this.count++
@@ -147,36 +155,8 @@ export class ModalChat implements AfterViewChecked {
         })
         this.userInput = '';
         setTimeout(() => {
-            this.content.scrollToBottom(8);
-        }, 600);
-    }
-
-    showGreeting(message) {
-        this.count++
-        if (message.from === this.receiver.toString()) {
-            let obj: ChatsList = {
-                message: message.text,
-                time: message.time,
-                userAvatar: this.user.userAvatar,
-                userId: 'User',
-                id: message.id
-            };
-            this.msgList.push(obj);
-            this.greetings.push(message)
-            setTimeout(() => {
-                this.content.scrollToBottom(8);
-            }, 600);
-        }
-    }
-
-    setConnected(connected) {
-        this.disabled = connected;
-        this.showConversation = connected;
-        this.greetings = [];
-    }
-
-    public disconnect(from: string) {
-        this.ws.disconnect();
+            this.content.scrollToBottom(500);
+        }, 10);
     }
 
 }

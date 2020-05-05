@@ -8,6 +8,8 @@ import { ModalController } from '@ionic/angular';
 import { ModalChat } from './modal-popup/chat-modal';
 import { LoginService } from '../services/login.service';
 import { AuthenticationService } from '../services/authentication-service';
+import { ChatSocketService } from '../services/chat-socket-service.service';
+import { ChatsResponse } from '../model/chats-response';
 
 @Component({
   selector: 'app-chat',
@@ -54,17 +56,22 @@ export class ChatPage {
   }
 
   public openChat(user: User) {
+      this.chatService.getChats(this.user.id.toString(), user.id.toString()).subscribe(res => {
+        if (res.type == HttpEventType.Sent) {
+          console.log('loading...');
+        } else if (res.type == HttpEventType.Response) {
+          let response: ChatsResponse = {
+            sent: res.body.sent,
+            received: res.body.received
+          }
+          this.presentModal(user.id, response);
+        }
+      },
+        err => {
+          console.log(err);
+        });
 
-    this.loginService.getUserInfo(user).subscribe(res => {
-      if (res.type == HttpEventType.Sent) {
-        console.log('loading...');
-      } else if (res.type == HttpEventType.Response) {
-        this.presentModal(user.id, res.body);
-      }
-    },
-      err => {
-        console.log(err);
-      });
+
 
   }
 
@@ -75,12 +82,13 @@ export class ChatPage {
     this.router.navigateByUrl('');
   }
 
-  async presentModal(user: number, userInfoToChat: any) {
+  async presentModal(user: number, chats: ChatsResponse) {
     const modal = await this.modalController.create({
       component: ModalChat,
       componentProps: {
         'receiver': user,
-        'chat': userInfoToChat
+        'sent': chats.sent,
+        'received': chats.received
       }
     });
     modal.onWillDismiss().then(() => {
