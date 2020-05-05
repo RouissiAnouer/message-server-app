@@ -8,7 +8,7 @@ import { ModalController, NavParams, IonContent } from '@ionic/angular';
 import { DatePipe } from '@angular/common';
 import { environment } from './../../../environments/environment';
 import { AuthenticationService } from 'src/app/services/authentication-service';
-import { ChatSocketService } from 'src/app/services/chat-socket-service.service';
+import { ChatSocketService } from 'src/app/services/chat-socket.service';
 import { Message } from 'src/app/model/message';
 import { StompHeaders } from '@stomp/stompjs';
 
