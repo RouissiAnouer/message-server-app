@@ -8,7 +8,7 @@ import { ModalController } from '@ionic/angular';
 import { ModalChat } from './modal-popup/chat-modal';
 import { LoginService } from '../services/login.service';
 import { AuthenticationService } from '../services/authentication-service';
-import { ChatSocketService } from '../services/chat-socket-service.service';
+import { ChatSocketService } from '../services/chat-socket.service';
 import { ChatsResponse } from '../model/chats-response';
 import { MessageReceived } from '../model/message';
 
