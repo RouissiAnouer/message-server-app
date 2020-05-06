@@ -10,6 +10,7 @@ import { LoginService } from '../services/login.service';
 import { AuthenticationService } from '../services/authentication-service';
 import { ChatSocketService } from '../services/chat-socket-service.service';
 import { ChatsResponse } from '../model/chats-response';
+import { MessageReceived } from '../model/message';
 
 @Component({
   selector: 'app-chat',
@@ -18,6 +19,7 @@ import { ChatsResponse } from '../model/chats-response';
 })
 export class ChatPage {
   public usersInfo: Array<UserInfo>;
+  public chatsReceived: Array<MessageReceived>;
   public receiver: string;
   public user: User;
   constructor(
@@ -31,25 +33,14 @@ export class ChatPage {
 
   public ngOnInit(): void {
     if (this.user.userName) {
-      this.chatService.getAllUser(this.user.userName).subscribe((res: HttpEvent<any>) => {
+
+      this.chatService.getChatReceived(this.user.id.toString()).subscribe((res: HttpEvent<any>) => {
         if (res.type == HttpEventType.Sent) {
-          console.log('loading...');
+          console.log('Loading ...');
         } else if (res.type == HttpEventType.Response) {
-          console.log('finish Loading');
-          this.usersInfo = res.body;
-          this.usersInfo.forEach((user: UserInfo) => {
-            user.image = "assets/icon/img_avatar2.png"
-            let array = user.sent.sort((a, b) => b.id - a.id);
-            user.sent = [];
-            array.forEach(item => {
-              user.sent.push(item);
-            })
-          });
+          this.chatsReceived = res.body.chats;
         }
-      },
-        err => {
-          console.log(err);
-        });
+      });
     } else {
       this.router.navigateByUrl('');
     }

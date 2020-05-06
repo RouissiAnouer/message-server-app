@@ -22,5 +22,5 @@ export interface Chats {
     idReceiver: number;
     idSender: number;
     message: string;
-    timestamp: string;
+    time: string;
 }

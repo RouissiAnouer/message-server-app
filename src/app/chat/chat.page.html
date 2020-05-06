@@ -7,13 +7,13 @@
 
 <ion-content>
   <ion-list>
-    <ion-item *ngFor="let chat of usersInfo" lines="none" (click)="openChat(chat)">
+    <ion-item *ngFor="let chat of chatsReceived" lines="none" (click)="openChat(chat)">
       <div class="borderBottomLine"></div>
       <div class="listSection">
         <div class="UserimgSection">
           <ion-avatar class="chatImage" slot="start">
-            <ion-img [src]="chat.image"></ion-img>
-            <span class="onlineOffline_icon" style="background-color:#4cd137"></span>
+            <ion-img [src]="chat.avatar"></ion-img>
+            <span class="onlineOffline_icon" *ngIf="chat.status == 'CONNECTED'" style="background-color:#4cd137"></span>
           </ion-avatar>
         </div>
         <div class="usernameSection" padding-start padding>
@@ -21,12 +21,12 @@
             <ion-icon style="position: relative; top: 2px;" name="people" color="medium"></ion-icon>
             {{chat.givenName}} {{chat.familyName}}
           </h5>
-          <p *ngIf="chat.sent.length > 0" class="descText" no-margin no-padding>{{chat.sent[0].message}}</p>
+          <p *ngIf="chat.message != null" class="descText" no-margin no-padding>{{chat.message}}</p>
         </div>
       </div>
       <div slot="end" class="lastSection">
         <ion-note class="sendTime">{{chat.timestamp}}</ion-note>
-        <ion-badge *ngIf="chat.sent.length > 0" slot="end" class="userBadge">{{chat.sent.length}}</ion-badge>
+        <ion-badge *ngIf="chat.counter > 0" slot="end" class="userBadge">{{chat.counter}}</ion-badge>
       </div>
   
     </ion-item>

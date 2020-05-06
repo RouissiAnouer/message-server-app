@@ -19,4 +19,9 @@ export class ChatService {
     const request = new HttpRequest('GET', environment.baseUrl+'/chats/getchat', {params:params});
     return this.http.request(request);
   }
+  getChatReceived(id: string): Observable<HttpEvent<any>> {
+    let params: HttpParams = new HttpParams().set('id', id);
+    const request = new HttpRequest('GET',environment.baseUrl+'/chats/getall', {params: params});
+    return this.http.request(request);
+  }
 }

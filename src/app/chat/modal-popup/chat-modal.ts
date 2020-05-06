@@ -56,8 +56,6 @@ export class ModalChat implements AfterViewChecked {
         });
         this.sent = this.params.get('sent');
         this.received = this.params.get('received');
-        console.log('SENT : ', this.sent);
-        console.log('RECEIVED : ', this.received);
     }
     ngAfterViewChecked(): void {
         this.content.scrollToBottom(500);
@@ -67,7 +65,7 @@ export class ModalChat implements AfterViewChecked {
         this.received.forEach(msg => {
             let obj: ChatsList = {
                 message: msg.message,
-                time: msg.timestamp,
+                time: msg.time,
                 userAvatar: "assets/icon/img_avatar2.png",
                 userId: 'User',
                 id: msg.id
@@ -77,7 +75,7 @@ export class ModalChat implements AfterViewChecked {
         this.sent.forEach(msg => {
             let obj: ChatsList = {
                 message: msg.message,
-                time: msg.timestamp,
+                time: msg.time,
                 userAvatar: "assets/icon/img_avatar2.png",
                 userId: 'toUser',
                 id: msg.id
@@ -94,7 +92,6 @@ export class ModalChat implements AfterViewChecked {
     }
 
     dismiss() {
-        // this.socketService.disconnect();
         this.modalCtrl.dismiss({
             'dismissed': true
         });
