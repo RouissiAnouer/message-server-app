@@ -32,13 +32,8 @@ export class ModalChat implements AfterViewChecked {
     @Input() receiver: number;
     @Input() userInput: string;
     public user: User;
-    public chats: UserInfo;
-    public avatar: string;
     public msgList: Array<ChatsList> = new Array<ChatsList>();
     public greetings: string[] = [];
-    public showConversation: boolean = false;
-    public ws: any;
-    public disabled: boolean;
     public count: number;
     public sent: Array<Chats>;
     public received: Array<Chats>;
