@@ -18,7 +18,6 @@ import { MessageReceived } from '../model/message';
   styleUrls: ['./chat.page.scss'],
 })
 export class ChatPage {
-  public usersInfo: Array<UserInfo>;
   public chatsReceived: Array<MessageReceived>;
   public receiver: string;
   public user: User;

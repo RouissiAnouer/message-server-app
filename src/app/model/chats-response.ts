@@ -8,3 +8,12 @@ export interface Chats {
     id: number;
     time: string
 }
+
+
+export interface ChatsList {
+    userId: string;
+    userAvatar: string;
+    message: string;
+    time: string;
+    id: number;
+}

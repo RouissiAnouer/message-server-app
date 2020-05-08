@@ -1,24 +1,13 @@
 import { Storage } from '@ionic/storage';
-import { Component, Input, OnInit, ViewChild, AfterViewInit, ViewChildren, AfterViewChecked } from '@angular/core';
-import { User, Chats, UserInfo } from 'src/app/model/User';
-import { HttpHeaders } from '@angular/common/http';
-import * as Stomp from 'stompjs';
-import * as SockJS from 'sockjs-client';
+import { Component, Input, ViewChild, AfterViewChecked } from '@angular/core';
+import { User, Chats } from 'src/app/model/User';
 import { ModalController, NavParams, IonContent } from '@ionic/angular';
 import { DatePipe } from '@angular/common';
-import { environment } from './../../../environments/environment';
 import { AuthenticationService } from 'src/app/services/authentication-service';
 import { ChatSocketService } from 'src/app/services/chat-socket.service';
 import { Message } from 'src/app/model/message';
 import { StompHeaders } from '@stomp/stompjs';
-
-export interface ChatsList {
-    userId: string;
-    userAvatar: string;
-    message: string;
-    time: string;
-    id: number;
-}
+import { ChatsList } from 'src/app/model/chats-response';
 
 @Component({
     selector: 'modal-page',
@@ -38,11 +27,10 @@ export class ModalChat implements AfterViewChecked {
     public sent: Array<Chats>;
     public received: Array<Chats>;
 
-    constructor(private modalCtrl: ModalController, 
-        private params: NavParams, 
-        private datePipe: DatePipe, 
+    constructor(private modalCtrl: ModalController,
+        private params: NavParams,
+        private datePipe: DatePipe,
         private storage: Storage,
-        private authService: AuthenticationService,
         private socketService: ChatSocketService) {
         this.storage.get('user').then(val => {
             this.user = JSON.parse(val);
@@ -76,11 +64,11 @@ export class ModalChat implements AfterViewChecked {
                 id: msg.id
             };
             this.msgList.push(obj);
-            let array = this.msgList.sort((a, b) => a.id - b.id);
-            this.msgList = [];
-            array.forEach(item => {
-                this.msgList.push(item);
-            })
+        });
+        let array = this.msgList.sort((a, b) => a.id - b.id);
+        this.msgList = [];
+        array.forEach(item => {
+            this.msgList.push(item);
         });
         this.count = this.msgList[this.msgList.length - 1].id;
         this.connectSocket(this.user.id);
@@ -126,7 +114,7 @@ export class ModalChat implements AfterViewChecked {
     }
 
     connectSocket(owner: number): void {
-        this.socketService.onMessage('/topic/reply.'+owner).subscribe(message => {
+        this.socketService.onMessage('/topic/reply.' + owner).subscribe(message => {
             this.showGreeting(message);
         });
     }
