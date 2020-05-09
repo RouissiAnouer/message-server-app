@@ -18,16 +18,17 @@ export class ChatSocketService implements OnDestroy {
   constructor(private authService: AuthenticationService) {
     this.client = over(new SockJS(environment.baseUrl + environment.socketUrl));
     this.state = new BehaviorSubject<socketClientState>(socketClientState.ATTEMPTING);
-    this.user = this.authService.getUserInfo();
-    let headers: StompHeaders = {
-      'Authorization': this.user.tokenType + ' ' + this.user.token,
-      'Content-Type': 'application/json'
-    };
-    this.client.connect(headers, () => {
-      this.state.next(socketClientState.CONNECTED);
-    }, (err) => {
-      this.state.next(socketClientState.ATTEMPTING);
-      console.log(err);
+    this.authService.getUser().then(user => {
+      let headers: StompHeaders = {
+        'Authorization': user.tokenType + ' ' + user.token,
+        'Content-Type': 'application/json'
+      };
+      this.client.connect(headers, () => {
+        this.state.next(socketClientState.CONNECTED);
+      }, (err) => { 
+        this.state.next(socketClientState.ATTEMPTING);
+        console.log(err);
+      });
     });
   }
 

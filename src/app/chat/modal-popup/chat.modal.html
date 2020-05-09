@@ -88,7 +88,7 @@
 <ion-footer style="background-color: #2f517c;" translucent>
     <ion-item>
         <ion-icon slot="start" name="camera" expand="icon-only" class="footerIcon"></ion-icon>
-        <ion-input class="input-box" type="text" placeholder="Write a message..." [(ngModel)]="userInput"
+        <ion-input class="input-box" type="text" placeholder="Write a message..." (keyup.enter)="sendMessageTo()" [(ngModel)]="userInput"
             ></ion-input>
     </ion-item>
 </ion-footer>

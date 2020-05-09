@@ -25,7 +25,7 @@ export class ChatPage {
     private chatService: ChatService,
     public modalController: ModalController,
     public loginService: LoginService,
-    private router: Router,
+    private socketService: ChatSocketService,
     private authService: AuthenticationService) {
   }
 
@@ -45,6 +45,7 @@ export class ChatPage {
         console.log('Loading ...');
       } else if (res.type == HttpEventType.Response) {
         this.chatsReceived = res.body.chats;
+        // this.connectSocket(this.user.id);
       }
     });
   }
@@ -54,6 +55,7 @@ export class ChatPage {
       if (res.type == HttpEventType.Sent) {
         console.log('loading...');
       } else if (res.type == HttpEventType.Response) {
+        // this.socketService.disconnect();
         let response: ChatsResponse = {
           sent: res.body.sent,
           received: res.body.received
@@ -64,10 +66,13 @@ export class ChatPage {
       err => {
         console.log(err);
       });
-
-
-
   }
+
+//   connectSocket(owner: number): void {
+//     this.socketService.onMessage('/topic/reply.' + owner).subscribe(message => {
+//         this.getChats();
+//     });
+// }
 
   public logout(): void {
     this.authService.logout();
