@@ -1,21 +1,29 @@
 import { Injectable } from '@angular/core';
 import { User } from '../model/User';
 import { Storage } from '@ionic/storage';
+import { Router } from '@angular/router';
+import { from, Observable } from 'rxjs';
 
 
 @Injectable()
 export class AuthenticationService {
 
-    constructor(private storage: Storage){}
+    constructor(private storage: Storage, private router: Router) { }
 
     public user: User = null;
     public authenticated: boolean = false;
 
     public setUser(user: User) {
+        this.storage.set('user', JSON.stringify(user));
         this.user = user;
+        this.setAuthenticated(true);
     }
 
-    public getUser(): User {
+    public getUser(): Promise<any> {
+        return this.storage.get('user');
+    }
+
+    public getUserInfo(): User {
         return this.user;
     }
 
@@ -23,7 +31,24 @@ export class AuthenticationService {
         this.authenticated = auth;
     }
 
-    public isAuthenticated(): boolean {
-        return this.authenticated;
+    public isAuthenticated(): Promise<boolean> {
+        return new Promise((resolve) => {
+            this.getUser().then(val => {
+                if (JSON.parse(val)) {
+                    this.user = JSON.parse(val);
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            });
+        });
+    }
+
+    public logout(): void {
+        this.storage.clear().then(() => {
+            this.setUser(null);
+            this.setAuthenticated(false);
+            this.router.navigateByUrl('login');
+        });
     }
 }

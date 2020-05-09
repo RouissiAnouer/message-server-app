@@ -8,21 +8,25 @@
 </ion-header>
 
 <ion-content>
+  <div style="height: 100%;">
+    <ion-row style="height: calc(100% - 81px);">
+      <ion-col style="align-self: center;">
+        <ion-item lines="full">
+          <ion-label class="label-custom" position="floating">Email</ion-label>
+          <ion-input class="input-custom" type="text" [(ngModel)]="username" required></ion-input>
+        </ion-item>
 
-      <ion-item lines="full">
-        <ion-label class="label-custom" position="floating">Email</ion-label>
-        <ion-input class="input-custom" type="text" [(ngModel)]="username" required></ion-input>
-      </ion-item>
-
-      <ion-item lines="full">
-        <ion-label class="label-custom" position="floating">Password</ion-label>
-        <ion-input class="input-custom" type="password" [(ngModel)]="password" required></ion-input>
-      </ion-item>
-
-  <ion-row>
-    <ion-col>
-      <ion-button type="submit" color="danger" expand="block" (click)="login()">Sign In</ion-button>
-      <a [routerLink]="['/forgot-password']" class="small-text">Forgot Password?</a>
-    </ion-col>
-  </ion-row>
+        <ion-item lines="full">
+          <ion-label class="label-custom" position="floating">Password</ion-label>
+          <ion-input class="input-custom" type="password" [(ngModel)]="password" required></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+    <ion-footer style="position: absolute; bottom: 0;">
+      <ion-col>
+        <ion-button type="submit" color="danger" expand="block" (click)="chackSession()">Sign In</ion-button>
+        <a [routerLink]="['/forgot-password']" class="small-text">Forgot Password?</a>
+      </ion-col>
+    </ion-footer>
+  </div>
 </ion-content>

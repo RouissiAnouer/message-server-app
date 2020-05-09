@@ -18,7 +18,7 @@ export class ChatSocketService implements OnDestroy {
   constructor(private authService: AuthenticationService) {
     this.client = over(new SockJS(environment.baseUrl + environment.socketUrl));
     this.state = new BehaviorSubject<socketClientState>(socketClientState.ATTEMPTING);
-    this.user = this.authService.getUser();
+    this.user = this.authService.getUserInfo();
     let headers: StompHeaders = {
       'Authorization': this.user.tokenType + ' ' + this.user.token,
       'Content-Type': 'application/json'

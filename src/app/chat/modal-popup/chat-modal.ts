@@ -23,7 +23,7 @@ export class ModalChat implements AfterViewChecked {
     public user: User;
     public msgList: Array<ChatsList> = new Array<ChatsList>();
     public greetings: string[] = [];
-    public count: number;
+    public count: number = 0;
     public sent: Array<Chats>;
     public received: Array<Chats>;
 
@@ -70,7 +70,9 @@ export class ModalChat implements AfterViewChecked {
         array.forEach(item => {
             this.msgList.push(item);
         });
-        this.count = this.msgList[this.msgList.length - 1].id;
+        if (array.length > 0) {
+            this.count = this.msgList[this.msgList.length - 1].id;
+        }
         this.connectSocket(this.user.id);
     }
 

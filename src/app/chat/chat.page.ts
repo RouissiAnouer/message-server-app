@@ -24,52 +24,53 @@ export class ChatPage {
   constructor(
     private chatService: ChatService,
     public modalController: ModalController,
-    public loginService: LoginService, private storage: Storage,
+    public loginService: LoginService,
     private router: Router,
     private authService: AuthenticationService) {
-    this.user = this.authService.getUser();
   }
 
-  public ngOnInit(): void {
-    if (this.user.userName) {
+  public ionViewWillEnter(): void {
+    this.authService.isAuthenticated().then(res => {
+      if (res) {
+        this.getChats();
+      }
+    });
+  }
 
-      this.chatService.getChatReceived(this.user.id.toString()).subscribe((res: HttpEvent<any>) => {
-        if (res.type == HttpEventType.Sent) {
-          console.log('Loading ...');
-        } else if (res.type == HttpEventType.Response) {
-          this.chatsReceived = res.body.chats;
-        }
-      });
-    } else {
-      this.router.navigateByUrl('');
-    }
+  private getChats(): void {
+    this.user = this.authService.getUserInfo();
+    this.user.userAvatar = "assets/icon/img_avatar2.png";
+    this.chatService.getChatReceived(this.user.id.toString()).subscribe((res: HttpEvent<any>) => {
+      if (res.type == HttpEventType.Sent) {
+        console.log('Loading ...');
+      } else if (res.type == HttpEventType.Response) {
+        this.chatsReceived = res.body.chats;
+      }
+    });
   }
 
   public openChat(user: User) {
-      this.chatService.getChats(this.user.id.toString(), user.id.toString()).subscribe(res => {
-        if (res.type == HttpEventType.Sent) {
-          console.log('loading...');
-        } else if (res.type == HttpEventType.Response) {
-          let response: ChatsResponse = {
-            sent: res.body.sent,
-            received: res.body.received
-          }
-          this.presentModal(user.id, response);
+    this.chatService.getChats(this.user.id.toString(), user.id.toString()).subscribe(res => {
+      if (res.type == HttpEventType.Sent) {
+        console.log('loading...');
+      } else if (res.type == HttpEventType.Response) {
+        let response: ChatsResponse = {
+          sent: res.body.sent,
+          received: res.body.received
         }
-      },
-        err => {
-          console.log(err);
-        });
+        this.presentModal(user.id, response);
+      }
+    },
+      err => {
+        console.log(err);
+      });
 
 
 
   }
 
   public logout(): void {
-    this.storage.remove('user');
-    this.authService.setUser(null);
-    this.authService.setAuthenticated(false);
-    this.router.navigateByUrl('');
+    this.authService.logout();
   }
 
   async presentModal(user: number, chats: ChatsResponse) {
@@ -82,10 +83,10 @@ export class ChatPage {
       }
     });
     modal.onWillDismiss().then(() => {
-      this.ngOnInit();
+      this.ionViewWillEnter();
     });
     return await modal.present();
-    
+
   }
 
 }

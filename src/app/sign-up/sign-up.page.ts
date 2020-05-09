@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { LoginService } from '../services/login.service';
 import { SignUpRequest } from '../model/signUpRequest';
 import { HttpEventType } from '@angular/common/http';
+import { ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-sign-up',
@@ -17,7 +18,8 @@ export class SignUpPage implements OnInit {
   public password: string;
 
   constructor(private router: Router,
-    private loginService: LoginService) { }
+    private loginService: LoginService,
+    private toastCtrl: ToastController) { }
 
   ngOnInit() {
   }
@@ -34,11 +36,27 @@ export class SignUpPage implements OnInit {
       if (observer.type === HttpEventType.Sent) {
         console.log("loading...");
       } else if (observer.type === HttpEventType.Response) {
-        this.router.navigate(['login']);
+        this.toastCtrl.create({
+          message: 'Account created successfully',
+          color: 'success',
+          duration: 2000
+        }).then(toast => {
+          toast.present();
+          toast.onDidDismiss().then(() => {
+            this.router.navigate(['login']);
+          });
+        });
       }
     },
     err => {
       console.log(err);
+      this.toastCtrl.create({
+        message: err.message,
+        duration: 2000,
+        color: 'danger'
+      }).then(toast => {
+        toast.present();
+      });
     });
   }
 
