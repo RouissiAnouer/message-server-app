@@ -24,4 +24,11 @@ export class ChatService {
     const request = new HttpRequest('GET',environment.baseUrl+'/chats/getall', {params: params});
     return this.http.request(request);
   }
+  updateChatStatus(ids: Array<number>): Observable<HttpEvent<any>> {
+    let data: any = {
+      ids: ids
+    };
+    const request = new HttpRequest('PUT',environment.baseUrl+'/chats/readchat', JSON.stringify(data), {});
+    return this.http.request(request);
+  }
 }

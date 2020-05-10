@@ -32,7 +32,7 @@ export class ChatSocketService implements OnDestroy {
     });
   }
 
-  private connect(): Observable<Client> {
+  public connect(): Observable<Client> {
     return new Observable<Client>(observer => {
       this.state.pipe(filter(state => state === socketClientState.CONNECTED)).subscribe(() => {
         observer.next(this.client);

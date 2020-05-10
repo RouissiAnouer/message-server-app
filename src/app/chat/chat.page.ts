@@ -45,7 +45,7 @@ export class ChatPage {
         console.log('Loading ...');
       } else if (res.type == HttpEventType.Response) {
         this.chatsReceived = res.body.chats;
-        // this.connectSocket(this.user.id);
+        this.connectSocket(this.user.id);
       }
     });
   }
@@ -68,13 +68,19 @@ export class ChatPage {
       });
   }
 
-//   connectSocket(owner: number): void {
-//     this.socketService.onMessage('/topic/reply.' + owner).subscribe(message => {
-//         this.getChats();
-//     });
-// }
+  connectSocket(owner: number): void {
+    this.socketService.onMessage('/topic/reply.' + owner).subscribe(message => {
+        this.chatsReceived.forEach(user => {
+          if (user.id === parseInt(message.from)) {
+            user.counter++;
+            user.message = message.text;
+          }
+        });
+    });
+}
 
   public logout(): void {
+    // this.socketService.disconnect();
     this.authService.logout();
   }
 
@@ -88,6 +94,7 @@ export class ChatPage {
       }
     });
     modal.onWillDismiss().then(() => {
+      // this.socketService.connect();
       this.ionViewWillEnter();
     });
     return await modal.present();

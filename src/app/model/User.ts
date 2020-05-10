@@ -23,4 +23,5 @@ export interface Chats {
     idSender: number;
     message: string;
     time: string;
+    read?:boolean;
 }

@@ -9,6 +9,7 @@ import { ChatPageRoutingModule } from './chat-routing.module';
 import { ChatPage } from './chat.page';
 import { ModalChat } from './modal-popup/chat-modal';
 import { ChatPopupModule } from './modal-popup/modal-popup.module';
+import { ChatSocketService } from '../services/chat-socket.service';
 
 @NgModule({
   imports: [
@@ -19,6 +20,7 @@ import { ChatPopupModule } from './modal-popup/modal-popup.module';
     ChatPopupModule
   ],
   declarations: [ChatPage],
-  entryComponents: [ModalChat]
+  entryComponents: [ModalChat],
+  providers: [ChatSocketService]
 })
 export class ChatPageModule {}

@@ -6,7 +6,8 @@ export interface ChatsResponse {
 export interface Chats {
     message: string;
     id: number;
-    time: string
+    time: string;
+    read?: boolean;
 }
 
 

@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { User } from '../model/User';
 import { Storage } from '@ionic/storage';
 import { Router } from '@angular/router';
-import { from, Observable } from 'rxjs';
 
 
 @Injectable()

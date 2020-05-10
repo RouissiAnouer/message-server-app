@@ -8,6 +8,8 @@ import { ChatSocketService } from 'src/app/services/chat-socket.service';
 import { Message } from 'src/app/model/message';
 import { StompHeaders } from '@stomp/stompjs';
 import { ChatsList } from 'src/app/model/chats-response';
+import { ChatService } from 'src/app/services/chat.service';
+import { HttpEventType } from '@angular/common/http';
 
 @Component({
     selector: 'modal-page',
@@ -31,6 +33,7 @@ export class ModalChat implements AfterViewChecked {
         private params: NavParams,
         private datePipe: DatePipe,
         private storage: Storage,
+        private chatService: ChatService,
         private socketService: ChatSocketService) {
         this.storage.get('user').then(val => {
             this.user = JSON.parse(val);
@@ -45,6 +48,7 @@ export class ModalChat implements AfterViewChecked {
     }
 
     getPage(): void {
+        let unReadMessages: Array<number> = new Array<number>();
         this.received.forEach(msg => {
             let obj: ChatsList = {
                 message: msg.message,
@@ -53,8 +57,14 @@ export class ModalChat implements AfterViewChecked {
                 userId: 'User',
                 id: msg.id
             };
+            if (!msg.read) {
+                unReadMessages.push(msg.id);
+            }
             this.msgList.push(obj);
         });
+        if (unReadMessages.length > 0) {
+           this.updateChat(unReadMessages);
+        }
         this.sent.forEach(msg => {
             let obj: ChatsList = {
                 message: msg.message,
@@ -73,10 +83,12 @@ export class ModalChat implements AfterViewChecked {
         if (array.length > 0) {
             this.count = this.msgList[this.msgList.length - 1].id;
         }
+        // this.socketService.connect();
         this.connectSocket(this.user.id);
     }
 
     dismiss() {
+        // this.socketService.disconnect();
         this.modalCtrl.dismiss({
             'dismissed': true
         });
@@ -84,6 +96,7 @@ export class ModalChat implements AfterViewChecked {
 
     showGreeting(message) {
         if (message.from === this.receiver.toString()) {
+            this.updateChat([message.id]);
             let obj: ChatsList = {
                 message: message.text,
                 time: message.time,
@@ -99,6 +112,16 @@ export class ModalChat implements AfterViewChecked {
             }, 10);
         }
     }
+
+    async updateChat(unReadMessages: Array<number>): Promise<any> {
+        this.chatService.updateChatStatus(unReadMessages).subscribe(response => {
+            if (response.type === HttpEventType.Sent) {
+                console.log('loading ...');
+            } else if (response.type === HttpEventType.Response) {
+                console.log(response);
+            }
+        });
+    } 
 
     sendMessageTo() {
         let headers: StompHeaders = {
