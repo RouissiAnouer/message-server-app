@@ -3,7 +3,7 @@ import { HttpClient, HttpEvent, HttpRequest, HttpHeaders, HttpParams } from '@an
 import { Observable } from 'rxjs';
 import { User } from '../model/User';
 import { environment } from './../../environments/environment';
-import { SignUpRequest } from '../model/signUpRequest';
+import { SignUpRequest, LogOutRequest } from '../model/signUpRequest';
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +29,10 @@ export class LoginService {
   }
   signUpUser(signUpRequest: SignUpRequest): Observable<HttpEvent<any>> {
     const request = new HttpRequest('POST', environment.baseUrl + '/auth/signup', JSON.stringify(signUpRequest), {});
+    return this.http.request(request);
+  }
+  logout(logOutRequest: LogOutRequest): Observable<HttpEvent<any>> {
+    const request = new HttpRequest('POST', environment.baseUrl+'/auth/logout', JSON.stringify(logOutRequest), {});
     return this.http.request(request);
   }
 }

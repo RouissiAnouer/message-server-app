@@ -13,7 +13,7 @@
         <div class="UserimgSection">
           <ion-avatar class="chatImage" slot="start">
             <ion-img [src]="chat.avatar"></ion-img>
-            <span class="onlineOffline_icon" *ngIf="chat.status == 'CONNECTED'" style="background-color:#4cd137"></span>
+            <span class="onlineOffline_icon" [ngStyle]="{'background-color': chat.connected ? '#4cd137':'grey'}"></span>
           </ion-avatar>
         </div>
         <div class="usernameSection" padding-start padding>

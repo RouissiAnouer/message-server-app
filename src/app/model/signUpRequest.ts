@@ -5,3 +5,6 @@ export interface SignUpRequest {
     password: string;
     role: string;
 }
+export interface LogOutRequest {
+    username: string;
+}

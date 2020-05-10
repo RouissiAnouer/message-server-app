@@ -25,7 +25,7 @@ export class ChatSocketService implements OnDestroy {
       };
       this.client.connect(headers, () => {
         this.state.next(socketClientState.CONNECTED);
-      }, (err) => { 
+      }, (err) => {
         this.state.next(socketClientState.ATTEMPTING);
         console.log(err);
       });
@@ -45,7 +45,12 @@ export class ChatSocketService implements OnDestroy {
   }
 
   disconnect(): void {
-    this.connect().pipe(first()).subscribe(inst => inst.disconnect(null));
+    this.connect().forEach((sub: any) => {
+      let map: Map<String, any> = sub.subscriptions;
+      for (let key of Object.keys(map)) {
+        sub.unsubscribe(key);
+      }
+    });
   }
 
   onMessage(topic: string, handler = ChatSocketService.jsonHandler): Observable<any> {

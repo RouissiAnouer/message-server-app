@@ -11,4 +11,5 @@ export interface MessageReceived {
     status: string;
     id: number;
     counter: number;
+    connected: boolean;
 }

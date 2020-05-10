@@ -55,11 +55,11 @@ export class ChatPage {
       if (res.type == HttpEventType.Sent) {
         console.log('loading...');
       } else if (res.type == HttpEventType.Response) {
-        // this.socketService.disconnect();
         let response: ChatsResponse = {
           sent: res.body.sent,
           received: res.body.received
         }
+        this.socketService.disconnect();
         this.presentModal(user.id, response);
       }
     },
@@ -70,18 +70,20 @@ export class ChatPage {
 
   connectSocket(owner: number): void {
     this.socketService.onMessage('/topic/reply.' + owner).subscribe(message => {
-        this.chatsReceived.forEach(user => {
-          if (user.id === parseInt(message.from)) {
-            user.counter++;
-            user.message = message.text;
-          }
-        });
+      this.chatsReceived.forEach(user => {
+        if (user.id === parseInt(message.from)) {
+          user.counter++;
+          user.message = message.text;
+        }
+      });
     });
-}
+  }
 
   public logout(): void {
-    // this.socketService.disconnect();
     this.authService.logout();
+    this.loginService.logout({username: this.user.userName}).subscribe(() => {
+      this.socketService.disconnect();
+    });
   }
 
   async presentModal(user: number, chats: ChatsResponse) {
@@ -94,7 +96,6 @@ export class ChatPage {
       }
     });
     modal.onWillDismiss().then(() => {
-      // this.socketService.connect();
       this.ionViewWillEnter();
     });
     return await modal.present();

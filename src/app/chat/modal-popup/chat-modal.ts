@@ -10,6 +10,7 @@ import { StompHeaders } from '@stomp/stompjs';
 import { ChatsList } from 'src/app/model/chats-response';
 import { ChatService } from 'src/app/services/chat.service';
 import { HttpEventType } from '@angular/common/http';
+import { first } from 'rxjs/operators';
 
 @Component({
     selector: 'modal-page',
@@ -83,12 +84,11 @@ export class ModalChat implements AfterViewChecked {
         if (array.length > 0) {
             this.count = this.msgList[this.msgList.length - 1].id;
         }
-        // this.socketService.connect();
         this.connectSocket(this.user.id);
     }
 
     dismiss() {
-        // this.socketService.disconnect();
+        this.socketService.disconnect();
         this.modalCtrl.dismiss({
             'dismissed': true
         });
