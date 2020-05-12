@@ -10,7 +10,7 @@ import { User } from '../model/User';
 })
 export class UserPage implements OnInit {
 
-  public image64: string;
+  public image64: File;
   private user: User;
 
   constructor(private userService: UserService, private authService: AuthenticationService ) {
@@ -29,12 +29,7 @@ export class UserPage implements OnInit {
   }
 
   handleImage(event: any): void {
-    let file = event.target.files[0];
-    let reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onloadend = () => {
-      this.image64 = reader.result.toString();
-    };
+    this.image64 = event.target.files[0];
   }
 
   uploadImage(): void {
