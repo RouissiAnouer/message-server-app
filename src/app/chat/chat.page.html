@@ -12,7 +12,8 @@
       <div class="listSection">
         <div class="UserimgSection">
           <ion-avatar class="chatImage" slot="start">
-            <ion-img [src]="chat.avatar"></ion-img>
+            <ion-img *ngIf="chat.avatar" [src]="chat.avatar"></ion-img>
+            <ion-img *ngIf="!chat.avatar" src="assets/icon/img_avatar2.png"></ion-img>
             <span class="onlineOffline_icon" [ngStyle]="{'background-color': chat.connected ? '#4cd137':'grey'}"></span>
           </ion-avatar>
         </div>
