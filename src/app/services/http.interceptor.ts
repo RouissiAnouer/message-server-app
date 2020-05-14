@@ -7,6 +7,7 @@ import { Storage } from '@ionic/storage';
 import { mergeMap } from 'rxjs/operators';
 import { User } from '../model/User';
 import { AuthenticationService } from './authentication-service';
+import { environment } from 'src/environments/environment';
 
 @Injectable()
 export class Interceptor implements HttpInterceptor {
@@ -36,13 +37,23 @@ export class Interceptor implements HttpInterceptor {
 
     private addToken(request: HttpRequest<any>, user: User): HttpRequest<any> {
         let clone: HttpRequest<any>;
+        console.log(request.url);
+
         if (user) {
-            clone = request.clone({
-                setHeaders: {
-                    Authorization: 'Bearer ' + user.token,
-                    'Content-Type': 'application/json'
-                }
-            });
+            if (request.url === environment.baseUrl + '/user/uploadimage') {
+                clone = request.clone({
+                    setHeaders: {
+                        Authorization: 'Bearer ' + user.token
+                    }
+                });
+            } else {
+                clone = request.clone({
+                    setHeaders: {
+                        Authorization: 'Bearer ' + user.token,
+                        'Content-Type': 'application/json'
+                    }
+                });
+            }
         } else {
             clone = request.clone({
                 setHeaders: {
