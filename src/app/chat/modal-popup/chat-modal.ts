@@ -9,8 +9,9 @@ import { Message } from 'src/app/model/message';
 import { StompHeaders } from '@stomp/stompjs';
 import { ChatsList } from 'src/app/model/chats-response';
 import { ChatService } from 'src/app/services/chat.service';
-import { HttpEventType } from '@angular/common/http';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { first } from 'rxjs/operators';
+import { UserService } from 'src/app/services/user.service';
 
 @Component({
     selector: 'modal-page',
@@ -36,11 +37,19 @@ export class ModalChat implements AfterViewChecked {
         private datePipe: DatePipe,
         private storage: Storage,
         private chatService: ChatService,
-        private socketService: ChatSocketService) {
+        private socketService: ChatSocketService,
+        private userService: UserService) {
         this.storage.get('user').then(val => {
             this.user = JSON.parse(val);
-            this.getPage();
+            this.userService.getUserInfo(this.user.userName).subscribe((res: any) => {
+                if (res instanceof HttpResponse) {
+                    this.user = res.body;
+                    this.getPage();
+                }
+            })
+            
         });
+        
         this.sent = this.params.get('sent');
         this.received = this.params.get('received');
         this.friendAvatar = this.params.get("avatar");

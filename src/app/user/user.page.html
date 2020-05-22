@@ -12,7 +12,6 @@
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-button color="light">
-        <ion-icon slot="start" name="ios-arrow-back"></ion-icon>
         My Profile
       </ion-button>
     </ion-buttons>
@@ -29,23 +28,13 @@
   <div class="card">
     <div class="header">
       <div class="avatar">
-        <img src="../../assets/icon/img_avatar2.png" (click)="uploadImage()" alt="">
-        <input style="display: none;" type="file" (change)="handleImage($event)">
+        <img #userImage (click)="uploadImage()" alt="">
+        <input style="display: none;" #imageInput type="file" (change)="handleImage($event)">
       </div>
     </div>
     <div class="card-body">
       <div class="user-meta ion-text-center">
-        <h3 class="playername">Roger Federer</h3>
-        <h5 class="country">Switzerland</h5>
-        <h6 class="ranking">Current ranking: <ion-chip>
-            <ion-label>2</ion-label>
-          </ion-chip>
-        </h6>
-      </div>
-      <div class="button-container">
-        <ion-button expand="full" color="primary">http://rogerfederer.com</ion-button>
-        <ion-button expand="full" color="secondary">@RogerFederer on Twitter</ion-button>
-        <ion-button expand="full" color="secondary">View profile at ATP</ion-button>
+        <h3 class="playername">{{givenName}} {{familyName}}</h3>
       </div>
     </div>
   </div>
