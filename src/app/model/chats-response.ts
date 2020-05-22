@@ -1,6 +1,7 @@
 export interface ChatsResponse {
     sent: Array<Chats>;
     received: Array<Chats>;
+    avatar?: string;
 }
 
 export interface Chats {

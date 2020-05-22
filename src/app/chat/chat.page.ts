@@ -39,7 +39,6 @@ export class ChatPage {
 
   private getChats(): void {
     this.user = this.authService.getUserInfo();
-    this.user.userAvatar = "assets/icon/img_avatar2.png";
     this.chatService.getChatReceived(this.user.id.toString()).subscribe((res: HttpEvent<any>) => {
       if (res.type == HttpEventType.Sent) {
         console.log('Loading ...');
@@ -57,7 +56,8 @@ export class ChatPage {
       } else if (res.type == HttpEventType.Response) {
         let response: ChatsResponse = {
           sent: res.body.sent,
-          received: res.body.received
+          received: res.body.received,
+          avatar: res.body.avatar
         }
         this.socketService.disconnect();
         this.presentModal(user.id, response);
@@ -92,7 +92,8 @@ export class ChatPage {
       componentProps: {
         'receiver': user,
         'sent': chats.sent,
-        'received': chats.received
+        'received': chats.received,
+        'avatar': chats.avatar
       }
     });
     modal.onWillDismiss().then(() => {

@@ -29,6 +29,7 @@ export class ModalChat implements AfterViewChecked {
     public count: number = 0;
     public sent: Array<Chats>;
     public received: Array<Chats>;
+    public friendAvatar: string;
 
     constructor(private modalCtrl: ModalController,
         private params: NavParams,
@@ -38,11 +39,11 @@ export class ModalChat implements AfterViewChecked {
         private socketService: ChatSocketService) {
         this.storage.get('user').then(val => {
             this.user = JSON.parse(val);
-            this.user.userAvatar = "assets/icon/img_avatar2.png";
             this.getPage();
         });
         this.sent = this.params.get('sent');
         this.received = this.params.get('received');
+        this.friendAvatar = this.params.get("avatar");
     }
     ngAfterViewChecked(): void {
         this.content.scrollToBottom(500);
@@ -54,7 +55,7 @@ export class ModalChat implements AfterViewChecked {
             let obj: ChatsList = {
                 message: msg.message,
                 time: msg.time,
-                userAvatar: "assets/icon/img_avatar2.png",
+                userAvatar: this.friendAvatar,
                 userId: 'User',
                 id: msg.id
             };
@@ -70,7 +71,7 @@ export class ModalChat implements AfterViewChecked {
             let obj: ChatsList = {
                 message: msg.message,
                 time: msg.time,
-                userAvatar: "assets/icon/img_avatar2.png",
+                userAvatar: this.user.userAvatar,
                 userId: 'toUser',
                 id: msg.id
             };
