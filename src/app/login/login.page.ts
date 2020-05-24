@@ -29,7 +29,7 @@ export class LoginPage implements OnInit {
   ngOnInit() {
   }
 
-  public chackSession() {
+  public checkSession() {
     this.authService.isAuthenticated().then(res => {
       if (res) {
         this.createToast('Login out from the old session', 'warning', 2000, true).then(toast => {
