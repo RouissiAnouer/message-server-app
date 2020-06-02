@@ -16,6 +16,7 @@ export class UserPage {
 
   @ViewChild("imageInput", { static: true }) public imageInput: ElementRef;
   @ViewChild("userImage", { static: true }) public userImage: ElementRef;
+  // @ViewChild("userImageCorporate", {static: true}) public imageCorp: ElementRef;
 
   public image64: File;
   public user: User;
@@ -39,8 +40,10 @@ export class UserPage {
         this.givenName = this.user.givenName;
         if (this.user && this.user.userAvatar) {
           this.userImage.nativeElement.src = this.user.userAvatar;
+          // this.imageCorp.nativeElement.src = this.user.userAvatar;
         } else {
           this.userImage.nativeElement.src = "../../assets/icon/img_avatar2.png";
+          // this.imageCorp.nativeElement.src = "../../assets/icon/img_avatar2.png";
         }
       }
     }, err => {
