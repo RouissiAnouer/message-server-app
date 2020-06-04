@@ -15,7 +15,7 @@ export interface UserInfo extends Document {
     id: number;
     sent: Array<Chats>;
     received: Array<Chats>;
-    image: string;
+    userAvatar: string;
 }
 export interface Chats {
     id: number;

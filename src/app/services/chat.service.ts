@@ -9,11 +9,6 @@ import { environment } from './../../environments/environment';
 export class ChatService {
 
   constructor(private http: HttpClient) { }
-  getAllUser(username: string): Observable<HttpEvent<any>> {
-    let params: HttpParams = new HttpParams().set('username', username);
-    const request = new HttpRequest('GET', environment.baseUrl+'/user/getall', {params:params});
-    return this.http.request(request);
-  }
   getChats(id: string, receiver: string): Observable<HttpEvent<any>> {
     let params: HttpParams = new HttpParams().set('id', id).set('idTo', receiver);
     const request = new HttpRequest('GET', environment.baseUrl+'/chats/getchat', {params:params});

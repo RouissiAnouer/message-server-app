@@ -24,5 +24,10 @@ export class UserService {
     });
     return this.http.request(request);
   }
+  getAllUser(username: string): Observable<HttpEvent<any>> {
+    let params: HttpParams = new HttpParams().set('username', username);
+    const request = new HttpRequest('GET', environment.baseUrl+'/user/getall', {params:params});
+    return this.http.request(request);
+  }
 
 }

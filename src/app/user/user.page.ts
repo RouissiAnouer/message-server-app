@@ -1,10 +1,10 @@
 import { Component, OnInit, ViewChild, AfterViewInit, ElementRef, AfterViewChecked } from '@angular/core';
 import { UserService } from '../services/user.service';
 import { AuthenticationService } from '../services/authentication-service';
-import { User } from '../model/User';
+import { User, UserInfo } from '../model/User';
 import { Router } from '@angular/router';
-import { HttpEventType, HttpResponse } from '@angular/common/http';
-import { ToastController } from '@ionic/angular';
+import { HttpEventType, HttpResponse, HttpEvent } from '@angular/common/http';
+import { ToastController, MenuController } from '@ionic/angular';
 import { Storage } from '@ionic/storage';
 
 @Component({
@@ -16,19 +16,30 @@ export class UserPage {
 
   @ViewChild("imageInput", { static: true }) public imageInput: ElementRef;
   @ViewChild("userImage", { static: true }) public userImage: ElementRef;
-  // @ViewChild("userImageCorporate", {static: true}) public imageCorp: ElementRef;
+  @ViewChild("userCover", { static: true }) public userCover: ElementRef;
 
   public image64: File;
   public user: User;
   public givenName: string;
   public familyName: string;
+  public users: Array<UserInfo> = new Array<UserInfo>();
 
   constructor(private userService: UserService,
-    private authService: AuthenticationService, private router: Router, private toastCtrl: ToastController, private storage: Storage) {
-      this.authService.getUser().then((user: User) => {
-        this.getUserInfo(user.userName);
-      })
-    }
+    private authService: AuthenticationService, private router: Router, private toastCtrl: ToastController, private storage: Storage,
+    private menuCtrl: MenuController) { }
+
+  private ionViewWillEnter(): void {
+    this.authService.getUser().then((user: User) => {
+      this.menuCtrl.enable(true);
+      this.getUserInfo(user.userName);
+      this.getAllUsers(user.userName);
+    })
+  }
+
+  private openProfile(user: UserInfo): void {
+    this.getUserInfo(user.userName);
+    this.getAllUsers(user.userName);
+  }
 
   private getUserInfo(userName: string): void {
     this.userService.getUserInfo(userName).subscribe((data: any) => {
@@ -40,15 +51,29 @@ export class UserPage {
         this.givenName = this.user.givenName;
         if (this.user && this.user.userAvatar) {
           this.userImage.nativeElement.src = this.user.userAvatar;
-          // this.imageCorp.nativeElement.src = this.user.userAvatar;
+          this.userCover.nativeElement.src = this.user.userAvatar;
         } else {
           this.userImage.nativeElement.src = "../../assets/icon/img_avatar2.png";
-          // this.imageCorp.nativeElement.src = "../../assets/icon/img_avatar2.png";
+          this.userCover.nativeElement.src = "../../assets/icon/img_avatar2.png";
         }
       }
     }, err => {
       this.createToast(err.message, 'danger', 2000).then(toast => toast.present());
     })
+  }
+
+  private getAllUsers(username: string): void {
+    this.userService.getAllUser(username).subscribe((data: HttpEvent<any>) => {
+      if (data.type === HttpEventType.Sent) {
+        console.log("loading...");
+      } else if (data instanceof HttpResponse) {
+        console.log("loading stop...");
+        this.users = data.body;
+        console.log(this.users);
+      }
+    }, err => {
+      this.createToast(err.message, 'danger', 2000).then(toast => toast.present());
+    });
   }
 
   handleImage(event: any): void {
@@ -66,7 +91,7 @@ export class UserPage {
       message: message,
       duration: duration,
       color: color,
-      position: top ? "top" : "bottom" 
+      position: top ? "top" : "bottom"
     });
   }
 
