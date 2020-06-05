@@ -14,9 +14,10 @@
 <ion-content fullscreen="true" slot="fixed">
   <div class="card">
     <div class="header">
-      <img #userCover class="cover" alt="">
+      <img #userCover (click)="uploadCover()" class="cover" alt="">
+      <input style="display: none;" #coverInput type="file" (change)="handleCover($event)">
       <div class="avatar">
-        <img #userImage (click)="uploadImage()" alt="">
+        <img #userImage (click)="uploadImage()" alt="" class="image-profile">
         <input style="display: none;" #imageInput type="file" (change)="handleImage($event)">
       </div>
     </div>

@@ -15,6 +15,7 @@ import { Storage } from '@ionic/storage';
 export class UserPage {
 
   @ViewChild("imageInput", { static: true }) public imageInput: ElementRef;
+  @ViewChild("coverInput", { static: true }) public coverInput: ElementRef;
   @ViewChild("userImage", { static: true }) public userImage: ElementRef;
   @ViewChild("userCover", { static: true }) public userCover: ElementRef;
 
@@ -28,7 +29,7 @@ export class UserPage {
     private authService: AuthenticationService, private router: Router, private toastCtrl: ToastController, private storage: Storage,
     private menuCtrl: MenuController) { }
 
-  private ionViewWillEnter(): void {
+  ionViewWillEnter(): void {
     this.authService.getUser().then((user: User) => {
       this.menuCtrl.enable(true);
       this.getUserInfo(user.userName);
@@ -49,13 +50,8 @@ export class UserPage {
         this.user = data.body;
         this.familyName = this.user.familyName;
         this.givenName = this.user.givenName;
-        if (this.user && this.user.userAvatar) {
-          this.userImage.nativeElement.src = this.user.userAvatar;
-          this.userCover.nativeElement.src = this.user.userAvatar;
-        } else {
-          this.userImage.nativeElement.src = "../../assets/icon/img_avatar2.png";
-          this.userCover.nativeElement.src = "../../assets/icon/img_avatar2.png";
-        }
+        this.userImage.nativeElement.src = this.user.userAvatar ? this.user.userAvatar : "../../assets/icon/img_avatar2.png";
+        this.userCover.nativeElement.src = this.user.cover ? this.user.cover : "../../assets/icon/img_avatar2.png";
       }
     }, err => {
       this.createToast(err.message, 'danger', 2000).then(toast => toast.present());
@@ -84,6 +80,16 @@ export class UserPage {
 
   uploadImage(): void {
     this.imageInput.nativeElement.click();
+  }
+
+  handleCover(event: any): void {
+    this.userService.uploadImageCover(event.target.files[0], this.user.userName).subscribe(res => {
+      this.getUserInfo(this.user.userName);
+    });
+  }
+
+  uploadCover(): void {
+    this.coverInput.nativeElement.click();
   }
 
   async createToast(message: string, color: string, duration: number, top?: boolean): Promise<HTMLIonToastElement> {

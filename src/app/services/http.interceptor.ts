@@ -40,7 +40,7 @@ export class Interceptor implements HttpInterceptor {
         console.log(request.url);
 
         if (user) {
-            if (request.url === environment.baseUrl + '/user/uploadimage') {
+            if (request.url.startsWith(environment.baseUrl + '/user/image/')) {
                 clone = request.clone({
                     setHeaders: {
                         Authorization: 'Bearer ' + user.token

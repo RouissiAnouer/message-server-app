@@ -7,6 +7,7 @@ export interface User {
     tokenType: string;
     id: number;
     userAvatar: string;
+    cover: string;
 }
 export interface UserInfo extends Document {
     givenName: string;
