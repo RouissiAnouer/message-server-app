@@ -79,7 +79,11 @@ export class UserPage {
   }
 
   uploadImage(): void {
-    this.imageInput.nativeElement.click();
+    this.authService.getUser().then((user: User) => {
+      if (user.userName === this.user.userName) {
+        this.imageInput.nativeElement.click();
+      }
+    });
   }
 
   handleCover(event: any): void {
@@ -89,7 +93,11 @@ export class UserPage {
   }
 
   uploadCover(): void {
-    this.coverInput.nativeElement.click();
+    this.authService.getUser().then((user: User) => {
+      if (user.userName === this.user.userName) {
+        this.coverInput.nativeElement.click();
+      }
+    });
   }
 
   async createToast(message: string, color: string, duration: number, top?: boolean): Promise<HTMLIonToastElement> {
