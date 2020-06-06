@@ -5,7 +5,7 @@ import { User } from '../model/User';
 import { Router } from '@angular/router';
 import { Storage } from '@ionic/storage';
 import { AuthenticationService } from '../services/authentication-service';
-import { ToastController } from '@ionic/angular';
+import { ToastController, MenuController } from '@ionic/angular';
 
 @Component({
   selector: 'app-login',
@@ -24,12 +24,13 @@ export class LoginPage implements OnInit {
     private routes: Router,
     private storage: Storage,
     private authService: AuthenticationService,
-    private toastCtrl: ToastController) { }
+    private toastCtrl: ToastController,
+    private menuCtrl: MenuController) { }
 
   ngOnInit() {
   }
 
-  public chackSession() {
+  public checkSession() {
     this.authService.isAuthenticated().then(res => {
       if (res) {
         this.createToast('Login out from the old session', 'warning', 2000, true).then(toast => {
@@ -52,6 +53,7 @@ export class LoginPage implements OnInit {
     this.loginService.login(this.username, this.password).subscribe((data: any) => {
       if (data instanceof HttpResponse) {
         this.user = data.body;
+        this.menuCtrl.enable(true);
         this.storage.set('user', JSON.stringify(data.body));
         this.authService.setUser(this.user);
         console.log("finish loading");

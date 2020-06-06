@@ -1,8 +1,8 @@
 <ion-header>
   <ion-toolbar>
-    <ion-buttons slot="start">
+    <!-- <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
-    </ion-buttons>
+    </ion-buttons> -->
     <ion-title>Log In</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -24,8 +24,8 @@
     </ion-row>
     <ion-footer style="position: absolute; bottom: 0;">
       <ion-col>
-        <ion-button type="submit" color="danger" expand="block" (click)="chackSession()">Sign In</ion-button>
-        <a [routerLink]="['/forgot-password']" class="small-text">Forgot Password?</a>
+        <ion-button type="submit" color="danger" expand="block" (click)="checkSession()">Sign In</ion-button>
+        <a [routerLink]="['/sign-up']" class="small-text">Create Profile?</a>
       </ion-col>
     </ion-footer>
   </div>

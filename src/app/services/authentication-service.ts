@@ -19,7 +19,9 @@ export class AuthenticationService {
     }
 
     public getUser(): Promise<any> {
-        return this.storage.get('user');
+        return this.storage.get('user').then(val => {
+            return JSON.parse(val);
+        });
     }
 
     public getUserInfo(): User {
@@ -33,8 +35,8 @@ export class AuthenticationService {
     public isAuthenticated(): Promise<boolean> {
         return new Promise((resolve) => {
             this.getUser().then(val => {
-                if (JSON.parse(val)) {
-                    this.user = JSON.parse(val);
+                if (val) {
+                    this.user = val;
                     resolve(true);
                 } else {
                     resolve(false);

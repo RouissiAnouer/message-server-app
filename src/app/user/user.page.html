@@ -1,0 +1,53 @@
+<ion-header translucent no-border>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>My Profile</ion-title>
+    <ion-buttons slot="end">
+      <ion-button>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content fullscreen="true" slot="fixed">
+  <div class="card">
+    <div class="header">
+      <img #userCover (click)="uploadCover()" class="cover" alt="">
+      <input style="display: none;" #coverInput type="file" (change)="handleCover($event)">
+      <div class="avatar">
+        <img #userImage (click)="uploadImage()" alt="" class="image-profile">
+        <input style="display: none;" #imageInput type="file" (change)="handleImage($event)">
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="user-meta ion-text-center">
+        <h3 class="playername">{{givenName}} {{familyName}}</h3>
+      </div>
+    </div>
+  </div>
+  <ion-grid>
+    <ion-row>
+      <ion-col size-lg="4" size="12" *ngFor="let item of users" (click)="openProfile(item)">
+        <ion-card style="height: 200px;">
+          <ion-card-header style="display: flex; align-items: center;">
+            <div style="width: 100%;">
+              <ion-card-subtitle>{{item.givenName}}</ion-card-subtitle>
+              <ion-card-title>{{item.familyName}}</ion-card-title>
+            </div>
+            <div style="width: 70px;">
+              <img *ngIf="item.userAvatar" [src]="item.userAvatar" class="image">
+              <img *ngIf="!item.userAvatar" src="assets/icon/img_avatar2.png" class="image">
+            </div>
+          </ion-card-header>
+
+          <ion-card-content>
+            Keep close to Nature's heart... and break clear away, once in awhile,
+            and climb a mountain or spend a week in the woods. Wash your spirit clean.
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

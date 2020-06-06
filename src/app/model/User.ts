@@ -7,6 +7,7 @@ export interface User {
     tokenType: string;
     id: number;
     userAvatar: string;
+    cover: string;
 }
 export interface UserInfo extends Document {
     givenName: string;
@@ -15,7 +16,7 @@ export interface UserInfo extends Document {
     id: number;
     sent: Array<Chats>;
     received: Array<Chats>;
-    image: string;
+    userAvatar: string;
 }
 export interface Chats {
     id: number;

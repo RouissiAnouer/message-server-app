@@ -1,7 +1,9 @@
 <ion-header>
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
     <ion-title>chat</ion-title>
-    <ion-title slot="end" (click)="logout()">Logout</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -12,7 +14,8 @@
       <div class="listSection">
         <div class="UserimgSection">
           <ion-avatar class="chatImage" slot="start">
-            <ion-img [src]="chat.avatar"></ion-img>
+            <ion-img *ngIf="chat.avatar" [src]="chat.avatar"></ion-img>
+            <ion-img *ngIf="!chat.avatar" src="assets/icon/img_avatar2.png"></ion-img>
             <span class="onlineOffline_icon" [ngStyle]="{'background-color': chat.connected ? '#4cd137':'grey'}"></span>
           </ion-avatar>
         </div>
@@ -28,9 +31,9 @@
         <ion-note class="sendTime">{{chat.timestamp}}</ion-note>
         <ion-badge *ngIf="chat.counter > 0" slot="end" class="userBadge">{{chat.counter}}</ion-badge>
       </div>
-  
+
     </ion-item>
   </ion-list>
 
-  
+
 </ion-content>

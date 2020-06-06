@@ -4,7 +4,7 @@ import { User, UserInfo } from '../model/User';
 import { HttpEventType, HttpResponse, HttpHeaders, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { ChatService } from '../services/chat.service';
-import { ModalController } from '@ionic/angular';
+import { ModalController, MenuController } from '@ionic/angular';
 import { ModalChat } from './modal-popup/chat-modal';
 import { LoginService } from '../services/login.service';
 import { AuthenticationService } from '../services/authentication-service';
@@ -26,10 +26,12 @@ export class ChatPage {
     public modalController: ModalController,
     public loginService: LoginService,
     private socketService: ChatSocketService,
-    private authService: AuthenticationService) {
+    private authService: AuthenticationService,
+    private menuCtrl: MenuController) {
   }
 
   public ionViewWillEnter(): void {
+    this.menuCtrl.enable(true);
     this.authService.isAuthenticated().then(res => {
       if (res) {
         this.getChats();
@@ -39,7 +41,6 @@ export class ChatPage {
 
   private getChats(): void {
     this.user = this.authService.getUserInfo();
-    this.user.userAvatar = "assets/icon/img_avatar2.png";
     this.chatService.getChatReceived(this.user.id.toString()).subscribe((res: HttpEvent<any>) => {
       if (res.type == HttpEventType.Sent) {
         console.log('Loading ...');
@@ -57,7 +58,8 @@ export class ChatPage {
       } else if (res.type == HttpEventType.Response) {
         let response: ChatsResponse = {
           sent: res.body.sent,
-          received: res.body.received
+          received: res.body.received,
+          avatar: res.body.avatar
         }
         this.socketService.disconnect();
         this.presentModal(user.id, response);
@@ -92,7 +94,8 @@ export class ChatPage {
       componentProps: {
         'receiver': user,
         'sent': chats.sent,
-        'received': chats.received
+        'received': chats.received,
+        'avatar': chats.avatar
       }
     });
     modal.onWillDismiss().then(() => {

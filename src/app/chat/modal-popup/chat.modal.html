@@ -19,7 +19,8 @@
                                 <div class="imageAvatarBottomIcon">
                                     <ion-icon name="add" expand="icon-only" color="light"> </ion-icon>
                                 </div>
-                                <ion-img [src]="chat.userAvatar"></ion-img>
+                                <ion-img *ngIf="chat.userAvatar" [src]="chat.userAvatar"></ion-img>
+                                <ion-img *ngIf="!chat.userAvatar" src="assets/icon/img_avatar2.png"></ion-img>
                             </ion-avatar>
                         </div>
                         <ion-label class="label-message" color="light">
@@ -63,7 +64,8 @@
                                 <div class="imageAvatarBottomIcon">
                                     <ion-icon name="add" expand="icon-only" color="light"> </ion-icon>
                                 </div>
-                                <ion-img [src]="chat.userAvatar"></ion-img>
+                                <ion-img *ngIf="chat.userAvatar" [src]="chat.userAvatar"></ion-img>
+                                <ion-img *ngIf="!chat.userAvatar" src="assets/icon/img_avatar2.png"></ion-img>
                             </ion-avatar>
                         </div>
                     </div>
