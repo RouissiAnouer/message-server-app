@@ -9,8 +9,6 @@
     --ion-background-color: #2f517c;
 }
 
-.log-out-icon {
-    > .icon-inner {
-        color: white;
-    }
+ion-icon.log-out-icon {
+    color: white;
 }

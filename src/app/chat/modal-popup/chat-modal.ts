@@ -3,14 +3,12 @@ import { Component, Input, ViewChild, AfterViewChecked } from '@angular/core';
 import { User, Chats } from 'src/app/model/User';
 import { ModalController, NavParams, IonContent } from '@ionic/angular';
 import { DatePipe } from '@angular/common';
-import { AuthenticationService } from 'src/app/services/authentication-service';
 import { ChatSocketService } from 'src/app/services/chat-socket.service';
 import { Message } from 'src/app/model/message';
 import { StompHeaders } from '@stomp/stompjs';
 import { ChatsList } from 'src/app/model/chats-response';
 import { ChatService } from 'src/app/services/chat.service';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
-import { first } from 'rxjs/operators';
 import { UserService } from 'src/app/services/user.service';
 
 @Component({
