@@ -1,5 +1,5 @@
 import { Storage } from '@ionic/storage';
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Type } from '@angular/core';
 import { User, UserInfo } from '../model/User';
 import { HttpEventType, HttpResponse, HttpHeaders, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -10,7 +10,7 @@ import { LoginService } from '../services/login.service';
 import { AuthenticationService } from '../services/authentication-service';
 import { ChatSocketService } from '../services/chat-socket.service';
 import { ChatsResponse } from '../model/chats-response';
-import { MessageReceived } from '../model/message';
+import { MessageReceived, TypeMessages } from '../model/message';
 
 @Component({
   selector: 'app-chat',
@@ -75,7 +75,7 @@ export class ChatPage {
       this.chatsReceived.forEach(user => {
         if (user.id === parseInt(message.from)) {
           user.counter++;
-          user.message = message.text;
+          user.message = message.type === TypeMessages.TEXT ? message.text:TypeMessages.FILE_RECEIVED;
         }
       });
     });

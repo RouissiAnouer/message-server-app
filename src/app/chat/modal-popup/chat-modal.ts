@@ -1,15 +1,16 @@
 import { Storage } from '@ionic/storage';
-import { Component, Input, ViewChild, AfterViewChecked } from '@angular/core';
+import { Component, Input, ViewChild, AfterViewChecked, ElementRef, Type } from '@angular/core';
 import { User, Chats } from 'src/app/model/User';
 import { ModalController, NavParams, IonContent } from '@ionic/angular';
 import { DatePipe } from '@angular/common';
 import { ChatSocketService } from 'src/app/services/chat-socket.service';
-import { Message } from 'src/app/model/message';
+import { Message, TypeMessages } from 'src/app/model/message';
 import { StompHeaders } from '@stomp/stompjs';
 import { ChatsList } from 'src/app/model/chats-response';
 import { ChatService } from 'src/app/services/chat.service';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { UserService } from 'src/app/services/user.service';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
     selector: 'modal-page',
@@ -19,6 +20,7 @@ import { UserService } from 'src/app/services/user.service';
 export class ModalChat implements AfterViewChecked {
 
     @ViewChild('IonContent', { static: false }) content: IonContent;
+    @ViewChild("cameraInput", { static: true }) public imageInput: ElementRef;
 
     @Input() receiver: number;
     @Input() userInput: string;
@@ -36,7 +38,8 @@ export class ModalChat implements AfterViewChecked {
         private storage: Storage,
         private chatService: ChatService,
         private socketService: ChatSocketService,
-        private userService: UserService) {
+        private userService: UserService,
+        private domSanitizer: DomSanitizer) {
         this.storage.get('user').then(val => {
             this.user = JSON.parse(val);
             this.userService.getUserInfo(this.user.userName).subscribe((res: any) => {
@@ -45,26 +48,35 @@ export class ModalChat implements AfterViewChecked {
                     this.getPage();
                 }
             })
-            
+
         });
-        
+
         this.sent = this.params.get('sent');
         this.received = this.params.get('received');
         this.friendAvatar = this.params.get("avatar");
     }
     ngAfterViewChecked(): void {
-        this.content.scrollToBottom(500);
+        setTimeout(() => {
+            this.content.scrollToBottom(500);
+        }, 100);
     }
 
     getPage(): void {
         let unReadMessages: Array<number> = new Array<number>();
         this.received.forEach(msg => {
+            let message: any;
+            if (msg.type === TypeMessages.IMAGE) {
+                message = this.domSanitizer.bypassSecurityTrustUrl(msg.message);
+            } else {
+                message = msg.message;
+            }
             let obj: ChatsList = {
-                message: msg.message,
+                message: message,
                 time: msg.time,
                 userAvatar: this.friendAvatar,
                 userId: 'User',
-                id: msg.id
+                id: msg.id,
+                type: msg.type
             };
             if (!msg.read) {
                 unReadMessages.push(msg.id);
@@ -72,15 +84,22 @@ export class ModalChat implements AfterViewChecked {
             this.msgList.push(obj);
         });
         if (unReadMessages.length > 0) {
-           this.updateChat(unReadMessages);
+            this.updateChat(unReadMessages);
         }
         this.sent.forEach(msg => {
+            let message: any;
+            if (msg.type === TypeMessages.IMAGE) {
+                message = this.domSanitizer.bypassSecurityTrustUrl(msg.message);
+            } else {
+                message = msg.message;
+            }
             let obj: ChatsList = {
-                message: msg.message,
+                message: message,
                 time: msg.time,
                 userAvatar: this.user.userAvatar,
                 userId: 'toUser',
-                id: msg.id
+                id: msg.id,
+                type: msg.type
             };
             this.msgList.push(obj);
         });
@@ -110,7 +129,8 @@ export class ModalChat implements AfterViewChecked {
                 time: message.time,
                 userAvatar: this.user.userAvatar,
                 userId: 'User',
-                id: message.id
+                id: message.id,
+                type: message.type
             };
             this.count = message.id;
             this.msgList.push(obj);
@@ -129,9 +149,9 @@ export class ModalChat implements AfterViewChecked {
                 console.log(response);
             }
         });
-    } 
+    }
 
-    sendMessageTo() {
+    sendMessageTo(message?: string) {
         let headers: StompHeaders = {
             'Authorization': this.user.tokenType + ' ' + this.user.token,
             'Content-Type': 'application/json'
@@ -139,8 +159,9 @@ export class ModalChat implements AfterViewChecked {
         let now = this.datePipe.transform(new Date(), 'MMM d, y, h:mm:ss a');
         let data: Message = {
             from: this.user.id.toString(),
-            text: this.userInput,
-            time: now
+            text: message === undefined ? this.userInput:message,
+            time: now,
+            type: TypeMessages.TEXT
         };
         this.socketService.send('/send/message/' + this.receiver, data, headers);
         this.orderSentMessage(now);
@@ -152,13 +173,14 @@ export class ModalChat implements AfterViewChecked {
         });
     }
 
-    orderSentMessage(now: string): void {
+    orderSentMessage(now: string, type?: string, message?: string | ArrayBuffer): void {
         let obj: ChatsList = {
-            message: this.userInput,
+            message: message === undefined ? this.userInput:message,
             time: now,
             userAvatar: this.user.userAvatar,
             userId: 'toUser',
-            id: this.count++
+            id: this.count++,
+            type: type === undefined ? TypeMessages.TEXT:type
         };
         this.msgList.push(obj);
         let array = this.msgList.sort((a, b) => a.id - b.id);
@@ -170,6 +192,36 @@ export class ModalChat implements AfterViewChecked {
         setTimeout(() => {
             this.content.scrollToBottom(500);
         }, 10);
+    }
+
+    handleImage(event: any): void {
+        let image: File = event.target.files[0];
+        let reader = new FileReader();
+        reader.readAsDataURL(image);
+        reader.onload = () => {
+            console.log(reader.result.toString());
+            this.sendImage(reader.result);
+        }
+    }
+
+    private sendImage(image64: string | ArrayBuffer): void {
+        let headers: StompHeaders = {
+            'Authorization': this.user.tokenType + ' ' + this.user.token,
+            'Content-Type': 'application/json'
+        }
+        let now = this.datePipe.transform(new Date(), 'MMM d, y, h:mm:ss a');
+        let data: Message = {
+            from: this.user.id.toString(),
+            text: image64,
+            time: now,
+            type: TypeMessages.IMAGE
+        };
+        this.socketService.send('/send/image/' + this.receiver, data, headers);
+        this.orderSentMessage(now, TypeMessages.IMAGE, image64);
+    }
+
+    public openImageLoader(): void {
+        this.imageInput.nativeElement.click();
     }
 
 }

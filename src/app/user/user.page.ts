@@ -37,7 +37,7 @@ export class UserPage {
     })
   }
 
-  private openProfile(user: UserInfo): void {
+  public openProfile(user: UserInfo): void {
     this.getUserInfo(user.userName);
     this.getAllUsers(user.userName);
   }
