@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  baseUrl: 'http://localhost:8088',
+  baseUrl: 'http://192.168.1.3:8088',
   socketUrl: '/chat',
   chatEndPoint: '/chats'
 };

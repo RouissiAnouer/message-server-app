@@ -80,6 +80,12 @@
             </ion-row>
         </div>
     </ion-list>
+    <ion-list>
+        <ion-item *ngFor="let file of mediaFiles" tappable (click)="play(file)" text-wrap>
+            {{file.name}}
+            <p>{{file.size / 1000 / 1000 | number}} MB</p>
+        </ion-item>
+    </ion-list>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
         <ion-fab-button (click)=" sendMessageTo()">
@@ -93,6 +99,8 @@
     <ion-item>
         <ion-icon slot="start" name="camera" expand="icon-only" class="footerIcon" (click)="openImageLoader()"></ion-icon>
         <input style="display: none;" #cameraInput type="file" (change)="handleImage($event)">
+        <ion-icon *ngIf="!recording" slot="start" name="mic" expand="icon-only" class="footerIcon" (click)="selectFile()"></ion-icon>
+        <ion-icon *ngIf="recording" slot="start" name="mic-off" expand="icon-only" class="footerIcon"></ion-icon>
         <ion-input class="input-box" type="text" placeholder="Write a message..." (keyup.enter)="sendMessageTo()" [(ngModel)]="userInput"
             ></ion-input>
     </ion-item>
