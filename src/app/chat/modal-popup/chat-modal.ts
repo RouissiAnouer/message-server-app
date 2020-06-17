@@ -14,6 +14,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { Media, MediaObject } from "@ionic-native/media/ngx";
 import { File, FileSaver, FileEntry } from "@ionic-native/file/ngx";
 import { MediaCapture, CaptureVideoOptions, MediaFile, CaptureError } from "@ionic-native/media-capture/ngx";
+import { ImagePicker } from "@ionic-native/image-picker/ngx";
 
 const MEDIA_FILES_KEY = "mediaFiles";
 const MEDIA_FOLDER = "mediaFolder";
@@ -52,12 +53,13 @@ export class ModalChat {
         private file: File,
         private mediaCapture: MediaCapture,
         private platform: Platform,
-        private actionSheet: ActionSheetController) {
+        private actionSheet: ActionSheetController,
+        private imagePicker: ImagePicker) {
         this.storage.get('user').then(val => {
             this.user = JSON.parse(val);
             this.userService.getUserInfo(this.user.userName).subscribe((res: any) => {
                 if (res instanceof HttpResponse) {
-                    this.user = res.body;
+                    // this.user = res.body;
                     this.getPage();
                 }
             })
@@ -123,10 +125,12 @@ export class ModalChat {
             this.content.scrollToBottom(250);
         }, 400);
         this.connectSocket(this.user.id);
-        this.checkFile();
+        if (this.platform.is('ios') || this.platform.is('android')) {
+            this.checkFile();
+        }
     }
 
-    async selectFile() {
+    async selectAudioOption() {
         const actionSheet = await this.actionSheet.create({
             header: 'What do you like to choose ?',
             buttons: [
@@ -135,11 +139,109 @@ export class ModalChat {
                     handler: () => {
                         this.captureAudio();
                     }
+                },
+                {
+                    text: 'Cancel',
+                    handler: () => {
+                        actionSheet.dismiss();
+                    }
                 }
             ]
         });
         await actionSheet.present();
     }
+
+    async selectVideoOption() {
+        const actionSheet = await this.actionSheet.create({
+            header: 'What do you like to choose ?',
+            buttons: [
+                {
+                    text: 'Capture Video',
+                    handler: () => {
+                        this.captureVideo();
+                    }
+                },
+                {
+                    text: 'Capture Image',
+                    handler: () => {
+                        this.captureImage();
+                    }
+                },
+                {
+                    text: 'Pick Image From Foto Library',
+                    handler: () => {
+                        if (this.platform.is('ios') || this.platform.is('android')) {
+                            this.pickImage();
+                        } else {
+                            this.openImageLoader();
+                        }
+                    }
+                },
+                {
+                    text: 'Cancel',
+                    handler: () => {
+                        actionSheet.dismiss();
+                    }
+                }
+            ]
+        });
+        await actionSheet.present();
+    }
+
+    pickImage(): void {
+        this.imagePicker.getPictures({}).then((data: Array<String>) => {
+            if (data.length > 0) {
+                console.log(data);
+                for(let i=0; i < data.length; i++) {
+                    const finalPath = "file://"+data[i].substring(7,data[i].lastIndexOf("/"));
+                    const name = data[i].substr(data[i].lastIndexOf('/') + 1);
+                    console.log(finalPath);
+                    console.log(name);
+                    this.file.readAsDataURL(finalPath, name).then(base64 => {
+                        this.sendImage(base64);
+                    }, err => {
+                        console.log(err);
+                        this.file.removeFile(finalPath, name);
+                    }).finally(() => {
+                        this.file.removeFile(finalPath, name);
+                    });
+                }
+            }
+        }, (err: CaptureError) => {
+            console.log(err);
+        });
+    }
+
+    captureVideo(): void {
+        this.mediaCapture.captureVideo().then((data: MediaFile[]) => {
+            if (data.length > 0) {
+                // this.copyFileToLocalDir(data[0].fullPath);
+            }
+        }, (err: CaptureError) => {
+            console.log(err);
+        });
+    }
+
+    captureImage(): void {
+        this.mediaCapture.captureImage().then((data: MediaFile[]) => {
+            if (data.length > 0) {
+                const finalPath = "file://"+data[0].fullPath.substring(7,data[0].fullPath.lastIndexOf("/")); 
+                const name = data[0].name;
+                this.file.readAsDataURL(finalPath, name).then(base64 => {
+                    console.log(base64);
+                    this.sendImage(base64);
+                }, err => {
+                    console.log(err);
+                    this.file.removeFile(finalPath, name);
+                }).finally(() => {
+                    this.file.removeFile(finalPath, name);
+                });
+            }
+        }, (err: CaptureError) => {
+            console.log(err);
+        });
+    }
+
 
     private checkFile(): void {
         this.platform.ready().then(() => {
@@ -156,7 +258,7 @@ export class ModalChat {
     }
 
     loadFiles(): void {
-        this.file.listDir(this.file.dataDirectory, MEDIA_FOLDER).then(res => {
+        this.file.listDir(this.file.dataDirectory, MEDIA_FOLDER).then((res: FileEntry[]) => {
             this.mediaFiles = res;
             console.log('files :', res);
         });
@@ -166,7 +268,7 @@ export class ModalChat {
         this.recording = true;
         this.mediaCapture.captureAudio().then((data: MediaFile[]) => {
             if (data.length > 0) {
-                this.copyFileToLocalDir(data[0].fullPath);
+                // this.copyFileToLocalDir(data[0].fullPath);
             }
         }, (err: CaptureError) => {
             console.log(err);
@@ -310,14 +412,9 @@ export class ModalChat {
         });
     }
 
-    captureVideo(): void {
-        let options: CaptureVideoOptions = {
-            limit: 1,
-            duration: 30
-        }
-        this.mediaCapture.captureVideo(options).then((res: MediaFile[]) => {
-            this.storedMediaFiles(res);
-        })
+    getNativePathFile(file: FileEntry): string {
+        const path = file.nativeURL.replace(/^file:\/\//, '');
+        return path;
     }
 
     play(file: FileEntry): void {
@@ -329,19 +426,6 @@ export class ModalChat {
         } else {
             console.info("it's a video");
         }
-    }
-
-    storedMediaFiles(files): void {
-        this.storage.get(MEDIA_FILES_KEY).then(res => {
-            if (res) {
-                let arr = JSON.parse(res);
-                arr = arr.concat(files);
-                this.storage.set(MEDIA_FILES_KEY, JSON.stringify(arr));
-            } else {
-                this.storage.set(MEDIA_FILES_KEY, JSON.stringify(files));
-            }
-            this.mediaFiles = this.mediaFiles.concat(files);
-        })
     }
 
 }
