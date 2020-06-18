@@ -234,17 +234,18 @@ export class ModalChat {
             if (data.length > 0) {
                 const finalPath = "file://" + data[0].fullPath.substring(7, data[0].fullPath.lastIndexOf("/"));
                 const name = data[0].name;
+                console.log(finalPath, name);
                 this.file.readAsDataURL(finalPath, name).then(base64 => {
                     this.sendImage(base64);
                 }, err => {
-                    console.error(err);
+                    console.log(err);
                     this.file.removeFile(finalPath, name);
                 }).finally(() => {
                     this.file.removeFile(finalPath, name);
                 });
             }
         }, (err: CaptureError) => {
-            console.error(err);
+            console.log(err);
         });
     }
 
@@ -254,17 +255,20 @@ export class ModalChat {
             if (data.length > 0) {
                 const finalPath = "file://" + data[0].fullPath.substring(7, data[0].fullPath.lastIndexOf("/"));
                 const name = data[0].name;
+                console.log(finalPath, name);
                 this.file.readAsDataURL(finalPath, name).then(base64 => {
                     this.sendAudio(base64);
                 }, err => {
-                    console.error(err);
+                    console.log(err);
+                    this.recording = false;
                     this.file.removeFile(finalPath, name);
                 }).finally(() => {
+                    this.recording = false;
                     this.file.removeFile(finalPath, name);
                 });
             }
         }, (err: CaptureError) => {
-            console.error(err);
+            console.log(err);
             this.recording = false;
         });
     }
