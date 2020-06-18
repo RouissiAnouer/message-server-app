@@ -28,6 +28,7 @@ export class ModalChat {
 
     @ViewChild('IonContent', { static: false }) content: IonContent;
     @ViewChild("cameraInput", { static: true }) public imageInput: ElementRef;
+    @ViewChild("audioInput", { static: true }) public audioInput: ElementRef;
 
     @Input() receiver: number;
     @Input() userInput: string;
@@ -75,8 +76,9 @@ export class ModalChat {
         let unReadMessages: Array<number> = new Array<number>();
         this.received.forEach(msg => {
             let message: any;
-            if (msg.type === TypeMessages.IMAGE) {
+            if (msg.type !== TypeMessages.TEXT) {
                 message = this.domSanitizer.bypassSecurityTrustUrl(msg.message);
+                console.log(msg.message);
             } else {
                 message = msg.message;
             }
@@ -98,8 +100,9 @@ export class ModalChat {
         }
         this.sent.forEach(msg => {
             let message: any;
-            if (msg.type === TypeMessages.IMAGE) {
+            if (msg.type !== TypeMessages.TEXT) {
                 message = this.domSanitizer.bypassSecurityTrustUrl(msg.message);
+                console.log(msg.message);
             } else {
                 message = msg.message;
             }
@@ -137,7 +140,11 @@ export class ModalChat {
                 {
                     text: 'Capture Audio',
                     handler: () => {
-                        this.captureAudio();
+                        if (this.platform.is('ios') || this.platform.is('android')) {
+                            this.captureAudio();
+                        } else {
+                            this.openAudioLoader();
+                        }
                     }
                 },
                 {
@@ -192,8 +199,8 @@ export class ModalChat {
         this.imagePicker.getPictures({}).then((data: Array<String>) => {
             if (data.length > 0) {
                 console.log(data);
-                for(let i=0; i < data.length; i++) {
-                    const finalPath = "file://"+data[i].substring(7,data[i].lastIndexOf("/"));
+                for (let i = 0; i < data.length; i++) {
+                    const finalPath = "file://" + data[i].substring(7, data[i].lastIndexOf("/"));
                     const name = data[i].substr(data[i].lastIndexOf('/') + 1);
                     console.log(finalPath);
                     console.log(name);
@@ -225,20 +232,40 @@ export class ModalChat {
     captureImage(): void {
         this.mediaCapture.captureImage().then((data: MediaFile[]) => {
             if (data.length > 0) {
-                const finalPath = "file://"+data[0].fullPath.substring(7,data[0].fullPath.lastIndexOf("/")); 
+                const finalPath = "file://" + data[0].fullPath.substring(7, data[0].fullPath.lastIndexOf("/"));
                 const name = data[0].name;
                 this.file.readAsDataURL(finalPath, name).then(base64 => {
-                    console.log(base64);
                     this.sendImage(base64);
                 }, err => {
-                    console.log(err);
+                    console.error(err);
                     this.file.removeFile(finalPath, name);
                 }).finally(() => {
                     this.file.removeFile(finalPath, name);
                 });
             }
         }, (err: CaptureError) => {
-            console.log(err);
+            console.error(err);
+        });
+    }
+
+    captureAudio(): void {
+        this.recording = true;
+        this.mediaCapture.captureAudio().then((data: MediaFile[]) => {
+            if (data.length > 0) {
+                const finalPath = "file://" + data[0].fullPath.substring(7, data[0].fullPath.lastIndexOf("/"));
+                const name = data[0].name;
+                this.file.readAsDataURL(finalPath, name).then(base64 => {
+                    this.sendAudio(base64);
+                }, err => {
+                    console.error(err);
+                    this.file.removeFile(finalPath, name);
+                }).finally(() => {
+                    this.file.removeFile(finalPath, name);
+                });
+            }
+        }, (err: CaptureError) => {
+            console.error(err);
+            this.recording = false;
         });
     }
 
@@ -261,18 +288,6 @@ export class ModalChat {
         this.file.listDir(this.file.dataDirectory, MEDIA_FOLDER).then((res: FileEntry[]) => {
             this.mediaFiles = res;
             console.log('files :', res);
-        });
-    }
-
-    captureAudio(): void {
-        this.recording = true;
-        this.mediaCapture.captureAudio().then((data: MediaFile[]) => {
-            if (data.length > 0) {
-                // this.copyFileToLocalDir(data[0].fullPath);
-            }
-        }, (err: CaptureError) => {
-            console.log(err);
-            this.recording = false;
         });
     }
 
@@ -304,6 +319,9 @@ export class ModalChat {
     }
 
     showGreeting(message) {
+        if (message.type !== TypeMessages.TEXT) {
+            message.text = this.domSanitizer.bypassSecurityTrustUrl(message.text);
+        }
         if (message.from === this.receiver.toString()) {
             this.updateChat([message.id]);
             let obj: ChatsList = {
@@ -355,7 +373,10 @@ export class ModalChat {
         });
     }
 
-    orderSentMessage(now: string, type?: string, message?: string | ArrayBuffer): void {
+    orderSentMessage(now: string, type?: string, message?: any): void {
+        if (type !== TypeMessages.TEXT) {
+            message = this.domSanitizer.bypassSecurityTrustUrl(message);
+        }
         let obj: ChatsList = {
             message: message === undefined ? this.userInput : message,
             time: now,
@@ -376,16 +397,6 @@ export class ModalChat {
         }, 10);
     }
 
-    handleImage(event: any): void {
-        let image = event.target.files[0];
-        let reader = new FileReader();
-        reader.readAsDataURL(image);
-        reader.onload = () => {
-            console.log(reader.result.toString());
-            this.sendImage(reader.result);
-        }
-    }
-
     private sendImage(image64: string | ArrayBuffer): void {
         let headers: StompHeaders = {
             'Authorization': this.user.tokenType + ' ' + this.user.token,
@@ -402,8 +413,48 @@ export class ModalChat {
         this.orderSentMessage(now, TypeMessages.IMAGE, image64);
     }
 
+    private sendAudio(image64: string | ArrayBuffer): void {
+        let headers: StompHeaders = {
+            'Authorization': this.user.tokenType + ' ' + this.user.token,
+            'Content-Type': 'application/json'
+        }
+        let now = this.datePipe.transform(new Date(), 'MMM d, y, h:mm:ss a');
+        let data: Message = {
+            from: this.user.id.toString(),
+            text: image64,
+            time: now,
+            type: TypeMessages.AUDIO
+        };
+        this.socketService.send('/send/audio/' + this.receiver, data, headers);
+        this.orderSentMessage(now, TypeMessages.AUDIO, image64);
+    }
+
     public openImageLoader(): void {
         this.imageInput.nativeElement.click();
+    }
+
+    public openAudioLoader(): void {
+        this.audioInput.nativeElement.click();
+    }
+
+    handleImage(event: any): void {
+        let image = event.target.files[0];
+        let reader = new FileReader();
+        reader.readAsDataURL(image);
+        reader.onload = () => {
+            console.log(reader.result.toString());
+            this.sendImage(reader.result);
+        }
+    }
+
+    handleAudio(event: any): void {
+        let image = event.target.files[0];
+        let reader = new FileReader();
+        reader.readAsDataURL(image);
+        reader.onload = () => {
+            console.log(reader.result.toString());
+            this.sendAudio(reader.result);
+        }
     }
 
     ionViewDidLoad() {

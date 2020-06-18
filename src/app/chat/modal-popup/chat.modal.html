@@ -38,6 +38,7 @@
                             </div>
                         </ion-label>
                         <img [src]="chat.message" *ngIf="chat.type === 'image'" class="image-message">
+                        <audio *ngIf="chat.type === 'audio'" controls [src]="chat.message" class="audio-class"></audio>
                     </div>
                 </ion-col>
             </ion-row>
@@ -59,6 +60,7 @@
                             </div>
                         </ion-label>
                         <img [src]="chat.message" *ngIf="chat.type === 'image'" class="image-message">
+                        <audio *ngIf="chat.type === 'audio'" controls [src]="chat.message" class="audio-class"></audio>
                         <div class="imageAvatarBottom">
                             <!-- <ion-icon class="imageAvatarBottomIcon" name="add" expand="icon-only" color="success"></ion-icon> -->
                             <ion-avatar class="avatar"
@@ -80,12 +82,6 @@
             </ion-row>
         </div>
     </ion-list>
-    <!-- <ion-list>
-        <ion-item *ngFor="let file of mediaFiles" tappable (click)="play(file)" text-wrap>
-            {{file.name}}
-            <p>{{file.size / 1000 / 1000 | number}} MB</p>
-        </ion-item>
-    </ion-list> -->
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
         <ion-fab-button (click)=" sendMessageTo()">
@@ -98,7 +94,8 @@
 <ion-footer style="background-color: #2f517c;" translucent>
     <ion-item>
         <ion-icon slot="start" name="camera" expand="icon-only" class="footerIcon" (click)="selectVideoOption()"></ion-icon>
-        <input style="display: none;" #cameraInput type="file" (change)="handleImage($event)">
+        <input style="display: none;" #cameraInput type="file" (change)="handleImage($event)" accept="image/*">
+        <input style="display: none;" #audioInput type="file" (change)="handleAudio($event)" accept="audio/*">
         <ion-icon *ngIf="!recording" slot="start" name="mic" expand="icon-only" class="footerIcon" (click)="selectAudioOption()"></ion-icon>
         <ion-icon *ngIf="recording" slot="start" name="mic-off" expand="icon-only" class="footerIcon"></ion-icon>
         <ion-input class="input-box" type="text" placeholder="Write a message..." (keyup.enter)="sendMessageTo()" [(ngModel)]="userInput"
