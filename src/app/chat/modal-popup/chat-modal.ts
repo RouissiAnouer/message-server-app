@@ -18,6 +18,8 @@ import { ImagePicker } from "@ionic-native/image-picker/ngx";
 
 const MEDIA_FILES_KEY = "mediaFiles";
 const MEDIA_FOLDER = "mediaFolder";
+const audioExtension: string = "data:audio/wav";
+const iosAudioExtension: string = "data:audio/vnd.wave";
 
 @Component({
     selector: 'modal-page',
@@ -75,10 +77,16 @@ export class ModalChat {
     getPage(): void {
         let unReadMessages: Array<number> = new Array<number>();
         this.received.forEach(msg => {
-            let message: any;
-            if (msg.type !== TypeMessages.TEXT) {
+            let message: any = msg.message;
+            if (msg.type === TypeMessages.IMAGE) {
                 message = this.domSanitizer.bypassSecurityTrustUrl(msg.message);
-                console.log(msg.message);
+            } else if (msg.type === TypeMessages.AUDIO) {
+                if (!this.platform.is("ios") && msg.message.indexOf(iosAudioExtension) !== -1) {
+                    message = audioExtension.concat(msg.message.substr(iosAudioExtension.length, msg.message.length));
+                } else if (this.platform.is("ios") && msg.message.indexOf(audioExtension) !== -1) {
+                    message = iosAudioExtension.concat(msg.message.substr(audioExtension.length, msg.message.length));
+                }
+                message = this.domSanitizer.bypassSecurityTrustUrl(message);
             } else {
                 message = msg.message;
             }
@@ -99,10 +107,16 @@ export class ModalChat {
             this.updateChat(unReadMessages);
         }
         this.sent.forEach(msg => {
-            let message: any;
-            if (msg.type !== TypeMessages.TEXT) {
+            let message: any = msg.message;
+            if (msg.type === TypeMessages.IMAGE) {
                 message = this.domSanitizer.bypassSecurityTrustUrl(msg.message);
-                console.log(msg.message);
+            } else if (msg.type === TypeMessages.AUDIO) {
+                if (!this.platform.is("ios") && msg.message.indexOf(iosAudioExtension) !== -1) {
+                    message = audioExtension.concat(msg.message.substr(iosAudioExtension.length, msg.message.length));
+                } else if (this.platform.is("ios") && msg.message.indexOf(audioExtension) !== -1) {
+                    message = iosAudioExtension.concat(msg.message.substr(audioExtension.length, msg.message.length));
+                }
+                message = this.domSanitizer.bypassSecurityTrustUrl(message);
             } else {
                 message = msg.message;
             }
@@ -331,7 +345,14 @@ export class ModalChat {
     }
 
     showGreeting(message) {
-        if (message.type !== TypeMessages.TEXT) {
+        if (message.type === TypeMessages.IMAGE) {
+            message.text = this.domSanitizer.bypassSecurityTrustUrl(message.text);
+        } else if (message.type === TypeMessages.AUDIO) {
+            if (!this.platform.is("ios") && message.text.indexOf(iosAudioExtension) !== -1) {
+                message.text = audioExtension.concat(message.text.substr(iosAudioExtension.length, message.text.length));
+            } else if (this.platform.is("ios") && message.text.indexOf(audioExtension) !== -1) {
+                message.text = iosAudioExtension.concat(message.text.substr(audioExtension.length, message.text.length));
+            }
             message.text = this.domSanitizer.bypassSecurityTrustUrl(message.text);
         }
         if (message.from === this.receiver.toString()) {
@@ -386,7 +407,15 @@ export class ModalChat {
     }
 
     orderSentMessage(now: string, type?: string, message?: any): void {
-        if ((type === TypeMessages.AUDIO) || (type === TypeMessages.IMAGE)) {
+        if (type === TypeMessages.IMAGE) {
+            message = this.domSanitizer.bypassSecurityTrustUrl(message);
+        } else if (type === TypeMessages.AUDIO) {
+            if (!this.platform.is("ios") && message.indexOf("data:audio/vnd.wave") !== -1) {
+                message = audioExtension.concat(message.substr(iosAudioExtension.length, message.length));
+            }
+            else if (this.platform.is("ios") && message.indexOf(audioExtension) !== -1) {
+                message = iosAudioExtension.concat(message.substr(audioExtension.length, message.length));
+            }
             message = this.domSanitizer.bypassSecurityTrustUrl(message);
         }
         let obj: ChatsList = {
