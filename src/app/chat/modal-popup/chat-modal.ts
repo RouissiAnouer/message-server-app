@@ -196,21 +196,31 @@ export class ModalChat {
     }
 
     pickImage(): void {
-        this.imagePicker.getPictures({}).then((data: Array<String>) => {
+        this.imagePicker.getPictures({}).then((data: Array<string>) => {
             if (data.length > 0) {
                 console.log(data);
                 for (let i = 0; i < data.length; i++) {
-                    const finalPath = "file://" + data[i].substring(7, data[i].lastIndexOf("/"));
-                    const name = data[i].substr(data[i].lastIndexOf('/') + 1);
-                    console.log(finalPath);
-                    console.log(name);
-                    this.file.readAsDataURL(finalPath, name).then(base64 => {
-                        this.sendImage(base64);
-                    }, err => {
-                        console.log(err);
-                        this.file.removeFile(finalPath, name);
-                    }).finally(() => {
-                        this.file.removeFile(finalPath, name);
+                    let path = data[i];
+                    let myPath: string = path;
+                    if (path.indexOf('file://') < 0) {
+                        myPath = 'file://' + path;
+                    }
+                    const ext = myPath.split('.').pop();
+                    const d = Date.now();
+                    const newName = `${d}.${ext}`;
+                    const name = myPath.substr(myPath.lastIndexOf('/') + 1);
+                    const copyFrom = myPath.substr(0, myPath.lastIndexOf('/') + 1);
+                    const copyTo = this.file.dataDirectory + MEDIA_FOLDER;
+
+                    this.file.copyFile(copyFrom, name, copyTo, newName).then(() => {
+                        this.file.readAsDataURL(copyTo, newName).then(base64 => {
+                            this.sendImage(base64);
+                        }, err => {
+                            console.log(err);
+                            this.file.removeFile(copyTo, newName);
+                        }).finally(() => {
+                            this.file.removeFile(copyTo, newName);
+                        });
                     });
                 }
             }
@@ -232,16 +242,27 @@ export class ModalChat {
     captureImage(): void {
         this.mediaCapture.captureImage().then((data: MediaFile[]) => {
             if (data.length > 0) {
-                const finalPath = "file://" + data[0].fullPath.substring(7, data[0].fullPath.lastIndexOf("/"));
-                const name = data[0].name;
-                console.log(finalPath, name);
-                this.file.readAsDataURL(finalPath, name).then(base64 => {
-                    this.sendImage(base64);
-                }, err => {
-                    console.log(err);
-                    this.file.removeFile(finalPath, name);
-                }).finally(() => {
-                    this.file.removeFile(finalPath, name);
+                let path = data[0].fullPath;
+                let myPath: string = path;
+                if (path.indexOf('file://') < 0) {
+                    myPath = 'file://' + path;
+                }
+                const ext = myPath.split('.').pop();
+                const d = Date.now();
+                const newName = `${d}.${ext}`;
+                const name = myPath.substr(myPath.lastIndexOf('/') + 1);
+                const copyFrom = myPath.substr(0, myPath.lastIndexOf('/') + 1);
+                const copyTo = this.file.dataDirectory + MEDIA_FOLDER;
+
+                this.file.copyFile(copyFrom, name, copyTo, newName).then(() => {
+                    this.file.readAsDataURL(copyTo, newName).then(base64 => {
+                        this.sendImage(base64);
+                    }, err => {
+                        console.log(err);
+                        this.file.removeFile(copyTo, newName);
+                    }).finally(() => {
+                        this.file.removeFile(copyTo, newName);
+                    });
                 });
             }
         }, (err: CaptureError) => {
@@ -250,26 +271,33 @@ export class ModalChat {
     }
 
     captureAudio(): void {
-        this.recording = true;
         this.mediaCapture.captureAudio().then((data: MediaFile[]) => {
             if (data.length > 0) {
-                const finalPath = "file://" + data[0].fullPath.substring(7, data[0].fullPath.lastIndexOf("/"));
-                const name = data[0].name;
-                console.log(finalPath, name);
-                this.file.readAsDataURL(finalPath, name).then(base64 => {
-                    this.sendAudio(base64);
-                }, err => {
-                    console.log(err);
-                    this.recording = false;
-                    this.file.removeFile(finalPath, name);
-                }).finally(() => {
-                    this.recording = false;
-                    this.file.removeFile(finalPath, name);
+                let path = data[0].fullPath;
+                let myPath: string = path;
+                if (path.indexOf('file://') < 0) {
+                    myPath = 'file://' + path;
+                }
+                const ext = myPath.split('.').pop();
+                const d = Date.now();
+                const newName = `${d}.${ext}`;
+                const name = myPath.substr(myPath.lastIndexOf('/') + 1);
+                const copyFrom = myPath.substr(0, myPath.lastIndexOf('/') + 1);
+                const copyTo = this.file.dataDirectory + MEDIA_FOLDER;
+
+                this.file.copyFile(copyFrom, name, copyTo, newName).then(() => {
+                    this.file.readAsDataURL(copyTo, newName).then(base64 => {
+                        this.sendAudio(base64);
+                    }, err => {
+                        console.log(err);
+                        this.file.removeFile(copyTo, newName);
+                    }).finally(() => {
+                        this.file.removeFile(copyTo, newName);
+                    });
                 });
             }
         }, (err: CaptureError) => {
             console.log(err);
-            this.recording = false;
         });
     }
 
@@ -293,26 +321,6 @@ export class ModalChat {
             this.mediaFiles = res;
             console.log('files :', res);
         });
-    }
-
-    copyFileToLocalDir(path): void {
-        this.recording = false;
-        console.log('copy file : ', path);
-        let myPath: string = path;
-        if (path.indexOf('file://') < 0) {
-            myPath = 'file://' + path;
-        }
-
-        const ext = myPath.split('.').pop();
-        const d = Date.now();
-        const newName = `${d}.${ext}`;
-        const name = myPath.substr(myPath.lastIndexOf('/') + 1);
-        const copyFrom = myPath.substr(0, myPath.lastIndexOf('/') + 1);
-        const copyTo = this.file.dataDirectory + MEDIA_FOLDER;
-
-        this.file.copyFile(copyFrom, name, copyTo, newName).then(() => {
-            this.loadFiles();
-        }, err => console.log(err));
     }
 
     dismiss() {
@@ -378,7 +386,7 @@ export class ModalChat {
     }
 
     orderSentMessage(now: string, type?: string, message?: any): void {
-        if (type !== TypeMessages.TEXT) {
+        if ((type === TypeMessages.AUDIO) || (type === TypeMessages.IMAGE)) {
             message = this.domSanitizer.bypassSecurityTrustUrl(message);
         }
         let obj: ChatsList = {
