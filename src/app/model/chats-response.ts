@@ -15,7 +15,8 @@ export interface Chats {
 export interface ChatsList {
     userId: string;
     userAvatar: string;
-    message: string;
+    message: string | ArrayBuffer;
     time: string;
     id: number;
+    type: string;
 }

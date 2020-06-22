@@ -23,7 +23,7 @@
                                 <ion-img *ngIf="!chat.userAvatar" src="assets/icon/img_avatar2.png"></ion-img>
                             </ion-avatar>
                         </div>
-                        <ion-label class="label-message" color="light">
+                        <ion-label *ngIf="chat.type === 'text'" class="label-message" color="light">
                             <div class="chatDiv" [ngClass]="{'sharper':((msgList[i+1] && msgList[i+1].userId === chat.userId) && 
                 (msgList[i-1] && msgList[i-1].userId === chat.userId)),
                 'sharper-top':(msgList[i-1] && msgList[i-1].userId === chat.userId),
@@ -37,6 +37,9 @@
                                 </div>
                             </div>
                         </ion-label>
+                        <img [src]="chat.message" *ngIf="chat.type === 'image'" class="image-message">
+                        <audio *ngIf="chat.type === 'audio'" controls [src]="chat.message" class="audio-class"></audio>
+                        <video *ngIf="chat.type === 'video'" controls [src]="chat.message" class="video-class"></video>
                     </div>
                 </ion-col>
             </ion-row>
@@ -44,7 +47,7 @@
                 <ion-col class="left" no-padding
                     [ngClass]="{'clubbed':((msgList[i+1] && msgList[i+1].userId != chat.userId)|| !msgList[i+1])}">
                     <div class="imageAvatarLeft">
-                        <ion-label class="label-message" color="light">
+                        <ion-label *ngIf="chat.type === 'text'" class="label-message" color="light">
                             <div class="chatDiv" [ngClass]="{'sharper':((msgList[i+1] && msgList[i+1].userId === chat.userId) && 
                 (msgList[i-1] && msgList[i-1].userId === chat.userId)),
                 'sharper-top':(msgList[i-1] && msgList[i-1].userId === chat.userId),
@@ -57,6 +60,9 @@
                                 </div>
                             </div>
                         </ion-label>
+                        <img [src]="chat.message" *ngIf="chat.type === 'image'" class="image-message">
+                        <audio *ngIf="chat.type === 'audio'" controls [src]="chat.message" class="audio-class"></audio>
+                        <video *ngIf="chat.type === 'video'" controls [src]="chat.message" class="video-class"></video>
                         <div class="imageAvatarBottom">
                             <!-- <ion-icon class="imageAvatarBottomIcon" name="add" expand="icon-only" color="success"></ion-icon> -->
                             <ion-avatar class="avatar"
@@ -89,7 +95,12 @@
 
 <ion-footer style="background-color: #2f517c;" translucent>
     <ion-item>
-        <ion-icon slot="start" name="camera" expand="icon-only" class="footerIcon"></ion-icon>
+        <ion-icon slot="start" name="camera" expand="icon-only" class="footerIcon" (click)="selectVideoOption()"></ion-icon>
+        <input style="display: none;" #cameraInput type="file" (change)="handleImage($event)" accept="image/*">
+        <input style="display: none;" #audioInput type="file" (change)="handleAudio($event)" accept="audio/*">
+        <input style="display: none;" #videoInput type="file" (change)="handleVideo($event)" accept="video/*">
+        <ion-icon *ngIf="!recording" slot="start" name="mic" expand="icon-only" class="footerIcon" (click)="selectAudioOption()"></ion-icon>
+        <ion-icon *ngIf="recording" slot="start" name="mic-off" expand="icon-only" class="footerIcon"></ion-icon>
         <ion-input class="input-box" type="text" placeholder="Write a message..." (keyup.enter)="sendMessageTo()" [(ngModel)]="userInput"
             ></ion-input>
     </ion-item>

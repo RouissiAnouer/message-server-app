@@ -4,13 +4,17 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { ModalChat } from './chat-modal';
 import { ChatSocketService } from 'src/app/services/chat-socket.service';
+import { Media } from "@ionic-native/media/ngx";
+import { File } from "@ionic-native/file/ngx";
+import { MediaCapture } from '@ionic-native/media-capture/ngx';
+import { ImagePicker } from '@ionic-native/image-picker/ngx';
 
 @NgModule({
     declarations: [ModalChat],
-    imports: [ CommonModule,
+    imports: [CommonModule,
         FormsModule,
-        IonicModule ],
+        IonicModule],
     exports: [],
-    providers: [DatePipe, ChatSocketService],
+    providers: [DatePipe, ChatSocketService, Media, File, MediaCapture, ImagePicker],
 })
-export class ChatPopupModule {}
+export class ChatPopupModule { }

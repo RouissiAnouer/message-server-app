@@ -8,7 +8,7 @@
 </ion-header>
 
 <ion-content>
-  <div style="height: 100%;">
+  <div class="auth-form" style="height: 100%;">
     <ion-row style="height: calc(100% - 81px);">
       <ion-col style="align-self: center;">
         <ion-item lines="full">
@@ -22,7 +22,7 @@
         </ion-item>
       </ion-col>
     </ion-row>
-    <ion-footer style="position: absolute; bottom: 0;">
+    <ion-footer class="auth-form" style="position: absolute; bottom: 0;">
       <ion-col>
         <ion-button type="submit" color="danger" expand="block" (click)="checkSession()">Sign In</ion-button>
         <a [routerLink]="['/sign-up']" class="small-text">Create Profile?</a>

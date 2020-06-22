@@ -26,6 +26,20 @@
 @import "~@ionic/angular/css/flex-utils.css";
 
 ion-header{
-    --ion-background-color: #b9b9da;
+    ion-toolbar {
+        --background: #2f517c;
+        ion-buttons {
+            ion-menu-button{
+                color: white;
+            }
+            ion-back-button {
+                color: white;
+            }
+        }
+        ion-title {
+            color: white;
+        }
+    }
 }
+
 
