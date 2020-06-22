@@ -79,7 +79,7 @@
             </ion-row>
             <ion-row *ngIf="((msgList[i+1] && msgList[i+1].userId != chat.userId)|| !msgList[i+1])">
                 <ion-col>
-                    <ion-text>{{chat.time}}</ion-text>
+                    <ion-text>{{chat.time | customFormat}}</ion-text>
                 </ion-col>
             </ion-row>
         </div>

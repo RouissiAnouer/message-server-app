@@ -13,6 +13,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { Interceptor } from './services/http.interceptor';
 import { IonicStorageModule } from '@ionic/storage';
 import { AuthenticationService } from './services/authentication-service';
+import { CustomFormatPipe } from './pipe/custom-format.pipe';
 
 @NgModule({
   declarations: [AppComponent],

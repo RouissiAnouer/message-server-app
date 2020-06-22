@@ -1,6 +1,6 @@
 export interface Message {
     from: string;
-    time: string;
+    time: number;
     text: string | ArrayBuffer;
     type: string;
 }
