@@ -447,7 +447,7 @@ export class ModalChat {
             type: type === undefined ? TypeMessages.TEXT : type
         };
         this.msgList.push(obj);
-        let array = this.msgList.sort((a, b) => a.id - b.id);
+        let array = this.msgList.sort((a, b) => a.time - b.time);
         this.msgList = [];
         array.forEach(item => {
             this.msgList.push(item);
