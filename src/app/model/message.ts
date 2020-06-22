@@ -18,5 +18,6 @@ export enum TypeMessages {
     TEXT = "text",
     AUDIO = "audio",
     IMAGE = "image",
+    VIDEO = "video",
     FILE_RECEIVED = "file sent to you"
 }
