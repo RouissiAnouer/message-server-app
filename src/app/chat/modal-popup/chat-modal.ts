@@ -88,6 +88,7 @@ export class ModalChat {
                     } else if (this.platform.is("ios") && msg.message.indexOf(audioExtension) !== -1) {
                         message = iosAudioExtension.concat(msg.message.substr(audioExtension.length, msg.message.length));
                     }
+                    message = this.domSanitizer.bypassSecurityTrustUrl(message);
                 }; break;
                 case TypeMessages.VIDEO: {
                     if (message.indexOf(iosVideoExtension) !== -1) {
@@ -122,6 +123,7 @@ export class ModalChat {
                     } else if (this.platform.is("ios") && msg.message.indexOf(audioExtension) !== -1) {
                         message = iosAudioExtension.concat(msg.message.substr(audioExtension.length, msg.message.length));
                     }
+                    message = this.domSanitizer.bypassSecurityTrustUrl(message);
                 }; break;
                 case TypeMessages.VIDEO: {
                     if (message.indexOf(iosVideoExtension) !== -1) {
@@ -394,6 +396,7 @@ export class ModalChat {
                 else if (this.platform.is("ios") && message.text.indexOf(audioExtension) !== -1) {
                     message.text = iosAudioExtension.concat(message.text.substr(audioExtension.length, message.text.length));
                 }
+                message = this.domSanitizer.bypassSecurityTrustUrl(message);
             }; break;
             case TypeMessages.VIDEO: {
                 if (message.text.indexOf(iosVideoExtension) !== -1) {
@@ -431,6 +434,7 @@ export class ModalChat {
                 else if (this.platform.is("ios") && message.indexOf(audioExtension) !== -1) {
                     message = iosAudioExtension.concat(message.substr(audioExtension.length, message.length));
                 }
+                message = this.domSanitizer.bypassSecurityTrustUrl(message);
             }; break;
             case TypeMessages.VIDEO: {
                 if (message.indexOf(iosVideoExtension) !== -1) {
