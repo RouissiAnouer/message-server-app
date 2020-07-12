@@ -23,7 +23,7 @@ export interface Chats {
     idReceiver: number;
     idSender: number;
     message: string;
-    time: string;
+    time: number;
     type: string;
     read?:boolean;
 }
