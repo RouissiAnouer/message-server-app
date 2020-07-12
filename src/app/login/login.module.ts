@@ -8,6 +8,7 @@ import { LoginPageRoutingModule } from './login-routing.module';
 
 import { LoginPage } from './login.page';
 import { LoginService } from '../services/login.service';
+import { PushNotificationService } from '../services/push-notification.service';
 
 @NgModule({
   imports: [
@@ -17,6 +18,6 @@ import { LoginService } from '../services/login.service';
     LoginPageRoutingModule
   ],
   declarations: [LoginPage],
-  providers: [LoginService]
+  providers: [LoginService, PushNotificationService]
 })
 export class LoginPageModule {}

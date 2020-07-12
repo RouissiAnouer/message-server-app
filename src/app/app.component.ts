@@ -7,6 +7,9 @@ import { AuthenticationService } from './services/authentication-service';
 import { LoginService } from './services/login.service';
 import { ChatSocketService } from './services/chat-socket.service';
 import { User } from './model/User';
+import { Push, PushObject, PushOptions } from '@ionic-native/push/ngx';
+import { pushConfig } from '../environments/environment';
+
 
 @Component({
   selector: 'app-root',
@@ -14,8 +17,8 @@ import { User } from './model/User';
   styleUrls: ['app.component.scss']
 })
 export class AppComponent {
-  
-  public navigate : any;
+
+  public navigate: any;
 
   constructor(
     private platform: Platform,
@@ -24,7 +27,8 @@ export class AppComponent {
     private authService: AuthenticationService,
     private loginService: LoginService,
     private socketService: ChatSocketService,
-    private menuCtrl: MenuController
+    private menuCtrl: MenuController,
+    private push: Push
   ) {
     this.initializeApp();
     this.sideMenu();
@@ -38,26 +42,25 @@ export class AppComponent {
     });
   }
 
-  sideMenu()
-  {
+  sideMenu() {
     this.navigate =
-    [
-      {
-        title : "Home",
-        url   : "",
-        icon  : "home"
-      },
-      {
-        title : "Chat",
-        url   : "/chat",
-        icon  : "chatbubbles"
-      },
-      {
-        title : "Profile",
-        url   : "/user",
-        icon  : "person"
-      },
-    ]
+      [
+        {
+          title: "Home",
+          url: "",
+          icon: "home"
+        },
+        {
+          title: "Chat",
+          url: "/chat",
+          icon: "chatbubbles"
+        },
+        {
+          title: "Profile",
+          url: "/user",
+          icon: "person"
+        },
+      ]
   }
 
   public logout(): void {
@@ -65,7 +68,7 @@ export class AppComponent {
       this.menuCtrl.enable(false);
     });
     this.authService.getUser().then((resp: User) => {
-      this.loginService.logout({username: resp.userName}).subscribe(() => {
+      this.loginService.logout({ username: resp.userName }).subscribe(() => {
         this.socketService.disconnect();
         this.authService.logout();
       })

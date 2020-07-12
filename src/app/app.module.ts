@@ -13,6 +13,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { Interceptor } from './services/http.interceptor';
 import { IonicStorageModule } from '@ionic/storage';
 import { AuthenticationService } from './services/authentication-service';
+import { Push } from '@ionic-native/push/ngx';
 
 @NgModule({
   declarations: [AppComponent],
@@ -27,7 +28,8 @@ import { AuthenticationService } from './services/authentication-service';
     SplashScreen,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: HTTP_INTERCEPTORS, useClass: Interceptor, multi: true },
-    AuthenticationService
+    AuthenticationService,
+    Push
   ],
   bootstrap: [AppComponent]
 })
