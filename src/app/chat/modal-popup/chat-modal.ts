@@ -16,6 +16,8 @@ import { File, FileSaver, FileEntry } from "@ionic-native/file/ngx";
 import { MediaCapture, CaptureVideoOptions, MediaFile, CaptureError } from "@ionic-native/media-capture/ngx";
 import { ImagePicker } from "@ionic-native/image-picker/ngx";
 import { Timestamp } from 'rxjs/internal/operators/timestamp';
+import { SocketIoService } from 'src/app/services/socket-io-service.service';
+import { SOCKET_EVENTS } from 'src/app/model/socketEvent';
 
 const MEDIA_FILES_KEY = "mediaFiles";
 const MEDIA_FOLDER = "mediaFolder";
@@ -60,7 +62,8 @@ export class ModalChat {
         private mediaCapture: MediaCapture,
         private platform: Platform,
         private actionSheet: ActionSheetController,
-        private imagePicker: ImagePicker) {
+        private imagePicker: ImagePicker,
+        private socketIoService: SocketIoService) {
         this.storage.get('user').then(val => {
             this.user = JSON.parse(val);
             this.userService.getUserInfo(this.user.userName).subscribe((res: any) => {
@@ -150,7 +153,7 @@ export class ModalChat {
         setTimeout(() => {
             this.content.scrollToBottom(250);
         }, 400);
-        this.connectSocket(this.user.id);
+        // this.connectSocket(this.user.id);
         if (this.platform.is('ios') || this.platform.is('android')) {
             this.checkFile();
         }
@@ -474,7 +477,8 @@ export class ModalChat {
             time: now,
             type: TypeMessages.TEXT
         };
-        this.socketService.send('/send/message/' + this.receiver, data, headers);
+        this.socketIoService.send(SOCKET_EVENTS.MESSAGE, {chatId: 1, content: 'hello socket io'});
+        // this.socketService.send('/send/message/' + this.receiver, data, headers);
         this.orderSentMessage(now);
     }
 

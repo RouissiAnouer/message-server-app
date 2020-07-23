@@ -7,8 +7,12 @@ import { Storage } from '@ionic/storage';
 import { AuthenticationService } from '../services/authentication-service';
 import { ToastController, MenuController } from '@ionic/angular';
 import { Push, PushOptions, PushObject } from '@ionic-native/push/ngx';
-import { pushConfig } from 'src/environments/environment';
+import { pushConfig, environment } from 'src/environments/environment';
 import { PushNotificationService } from '../services/push-notification.service';
+
+import * as io from 'socket.io-client';
+import { SocketIoService } from '../services/socket-io-service.service';
+import { SocketListenerService } from '../services/socket-listener-service.service';
 
 @Component({
   selector: 'app-login',
@@ -19,8 +23,8 @@ export class LoginPage implements OnInit {
 
   public username: string;
   public password: string;
-
   public user: User;
+  private socket: SocketIOClient.Socket;
 
   constructor(
     private loginService: LoginService,
@@ -30,7 +34,9 @@ export class LoginPage implements OnInit {
     private toastCtrl: ToastController,
     private menuCtrl: MenuController,
     private push: Push,
-    private pushNotificationService: PushNotificationService) { }
+    private pushNotificationService: PushNotificationService,
+    private SocketIoService: SocketIoService,
+    private socketListenerService: SocketListenerService) { }
 
   ngOnInit() {
   }
@@ -62,6 +68,8 @@ export class LoginPage implements OnInit {
         this.storage.set('user', JSON.stringify(data.body));
         this.authService.setUser(this.user);
         this.initPushNotification(this.user.id);
+        this.SocketIoService.connect(environment.socketIoBaseUrl, this.user.token);
+        this.socketListenerService.initMessagesSocketListeners([1], this.user.id);
         console.log("finish loading");
         this.routes.navigate(['chat']);
       } else if (data.type == HttpEventType.Sent) {
@@ -78,7 +86,7 @@ export class LoginPage implements OnInit {
       message: message,
       duration: duration,
       color: color,
-      position: top ? "top" : "bottom" 
+      position: top ? "top" : "bottom"
     });
   }
 

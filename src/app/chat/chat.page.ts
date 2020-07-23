@@ -46,7 +46,7 @@ export class ChatPage {
         console.log('Loading ...');
       } else if (res.type == HttpEventType.Response) {
         this.chatsReceived = res.body.chats;
-        this.connectSocket(this.user.id);
+        // this.connectSocket(this.user.id);
       }
     });
   }

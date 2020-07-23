@@ -6,9 +6,10 @@ import { PushNotificationConfig } from 'src/app/model/push-config';
 
 export const environment = {
   production: false,
-  baseUrl: 'http://192.168.1.20:8088',
+  baseUrl: 'http://localhost:8088',
   socketUrl: '/chat',
-  chatEndPoint: '/chats'
+  chatEndPoint: '/chats',
+  socketIoBaseUrl: 'http://localhost:3000'
 };
 
 export const pushConfig: PushNotificationConfig = {
